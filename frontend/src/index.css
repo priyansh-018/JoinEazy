@@ -1,9 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .font-display {
+    font-family: 'Anton', Impact, -apple-system, sans-serif;
+  }
+  .font-script {
+    font-family: 'Caveat', cursive, sans-serif;
+  }
+  .bg-paper {
+    background-color: #FAF7F2;
+  }
+  .border-paper {
+    border-color: #E6DFD5;
+  }
+}
+
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: #FAF7F2;
+  color: #1c1917;
+  overflow-x: hidden;
+}
+
+/* Texture overlay */
+.paper-grain {
+  background-image: radial-gradient(#d6cebe 0.75px, transparent 0.75px), radial-gradient(#d6cebe 0.75px, #FAF7F2 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
 }
 
 /* Custom scrollbar */
@@ -12,12 +39,12 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #FAF7F2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d6cebe;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #a8a29e;
 }
