@@ -91,3 +91,15 @@ CREATE TABLE IF NOT EXISTS student_confirmations (
   confirmed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(submission_id, user_id)
 );
+
+-- Support Tickets and Inquiries
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(180) NOT NULL,
+  subject VARCHAR(200) NOT NULL,
+  message TEXT NOT NULL,
+  recipient_email VARCHAR(180) NOT NULL DEFAULT 'priyansh191882@gmail.com',
+  status VARCHAR(30) NOT NULL DEFAULT 'new',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

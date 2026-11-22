@@ -26,7 +26,8 @@ const TABLES = [
   'assignments',
   'assignment_groups',
   'submissions',
-  'student_confirmations'
+  'student_confirmations',
+  'support_tickets'
 ];
 
 let saveTimeout = null;
