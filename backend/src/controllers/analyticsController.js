@@ -16,34 +16,44 @@ const getAdminAnalytics = async (req, res, next) => {
 
     // 2. Assignment-wise completion metrics
     const assignmentsRes = await db.query(
-      `SELECT a.id, a.title, a.due_date, a.target_type,
-              (SELECT COUNT(*) FROM submissions s WHERE s.assignment_id = a.id) as submitted_count,
-              CASE 
-                WHEN a.target_type = 'all' THEN (SELECT COUNT(*) FROM groups)
-                ELSE (SELECT COUNT(*) FROM assignment_groups ag WHERE ag.assignment_id = a.id)
-              END as total_target
+      `SELECT a.id, a.title, a.due_date, a.target_type
        FROM assignments a
        ORDER BY a.due_date ASC`
     );
 
-    const assignmentBreakdown = assignmentsRes.rows.map(a => {
-      const submitted = parseInt(a.submitted_count, 10);
-      const target = parseInt(a.total_target, 10);
-      const rate = target > 0 ? Math.round((submitted / target) * 100) : 0;
-      const isOverdue = new Date(a.due_date) < new Date();
+    const assignmentBreakdown = await Promise.all(
+      assignmentsRes.rows.map(async (a) => {
+        const subCountRes = await db.query(
+          'SELECT COUNT(*) as count FROM submissions WHERE assignment_id = $1',
+          [a.id]
+        );
+        const submitted = parseInt(subCountRes.rows[0].count, 10);
 
-      return {
-        id: a.id,
-        title: a.title,
-        due_date: a.due_date,
-        target_type: a.target_type,
-        submitted_count: submitted,
-        total_target: target,
-        pending_count: Math.max(0, target - submitted),
-        completion_rate: rate,
-        is_overdue: isOverdue
-      };
-    });
+        let target = totalGroups;
+        if (a.target_type === 'specific_groups') {
+          const targetRes = await db.query(
+            'SELECT COUNT(*) as count FROM assignment_groups WHERE assignment_id = $1',
+            [a.id]
+          );
+          target = parseInt(targetRes.rows[0].count, 10);
+        }
+
+        const rate = target > 0 ? Math.round((submitted / target) * 100) : 0;
+        const isOverdue = new Date(a.due_date) < new Date();
+
+        return {
+          id: a.id,
+          title: a.title,
+          due_date: a.due_date,
+          target_type: a.target_type,
+          submitted_count: submitted,
+          total_target: target,
+          pending_count: Math.max(0, target - submitted),
+          completion_rate: rate,
+          is_overdue: isOverdue
+        };
+      })
+    );
 
     // 3. Group-wise performance metrics
     const allGroupsRes = await db.query(

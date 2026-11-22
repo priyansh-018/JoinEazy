@@ -119,22 +119,29 @@ const getAllAssignments = async (req, res, next) => {
     const user = req.user;
 
     if (user.role === 'admin') {
-      // Get all assignments with counts of target groups and completed submissions
+      const totalGroupsRes = await db.query('SELECT COUNT(*) as count FROM groups');
+      const totalGroupsCount = parseInt(totalGroupsRes.rows[0].count, 10);
+
+      // Get all assignments
       const assignmentsRes = await db.query(
-        `SELECT a.*, u.name as professor_name,
-                (SELECT COUNT(*) FROM submissions s WHERE s.assignment_id = a.id) as submission_count,
-                CASE 
-                  WHEN a.target_type = 'all' THEN (SELECT COUNT(*) FROM groups)
-                  ELSE (SELECT COUNT(*) FROM assignment_groups ag WHERE ag.assignment_id = a.id)
-                END as total_target_groups
+        `SELECT a.*, u.name as professor_name
          FROM assignments a
          LEFT JOIN users u ON a.created_by = u.id
          ORDER BY a.due_date ASC`
       );
 
-      // Attach assigned groups for specific_groups
+      // Attach counts and assigned groups
       const enriched = await Promise.all(
         assignmentsRes.rows.map(async (assign) => {
+          const subCountRes = await db.query(
+            'SELECT COUNT(*) as count FROM submissions WHERE assignment_id = $1',
+            [assign.id]
+          );
+          const subCount = parseInt(subCountRes.rows[0].count, 10);
+
+          let targetGroups = totalGroupsCount;
+          let assignedGroupsList = [];
+
           if (assign.target_type === 'specific_groups') {
             const grps = await db.query(
               `SELECT g.id, g.name FROM assignment_groups ag
@@ -142,9 +149,16 @@ const getAllAssignments = async (req, res, next) => {
                WHERE ag.assignment_id = $1`,
               [assign.id]
             );
-            return { ...assign, assigned_groups: grps.rows };
+            assignedGroupsList = grps.rows;
+            targetGroups = assignedGroupsList.length;
           }
-          return { ...assign, assigned_groups: [] };
+
+          return {
+            ...assign,
+            submission_count: subCount,
+            total_target_groups: targetGroups,
+            assigned_groups: assignedGroupsList
+          };
         })
       );
 
