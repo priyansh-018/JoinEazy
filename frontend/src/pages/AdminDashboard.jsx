@@ -27,12 +27,13 @@ export default function AdminDashboard() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
+      setError('');
       const res = await api.get('/analytics/admin');
       if (res.data.success) {
         setAnalytics(res.data.analytics);
       }
     } catch (err) {
-      setError('Failed to fetch analytics data.');
+      setError(err.response?.data?.message || 'Failed to fetch analytics data.');
       console.error(err);
     } finally {
       setLoading(false);

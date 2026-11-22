@@ -160,9 +160,10 @@ async function initDB() {
   if (usePg) {
     try {
       console.log('Attempting PostgreSQL connection via DATABASE_URL...');
+      const isRemote = databaseUrl.includes('neon.tech') || databaseUrl.includes('supabase') || !databaseUrl.includes('localhost');
       const testPool = new Pool({
         connectionString: databaseUrl,
-        ssl: process.env.NODE_ENV === 'production' && !databaseUrl.includes('localhost') ? { rejectUnauthorized: false } : false
+        ssl: isRemote ? { rejectUnauthorized: false } : false
       });
       await testPool.query('SELECT 1');
       pool = testPool;
@@ -170,6 +171,7 @@ async function initDB() {
 
       // Run schema
       await pool.query(schemaSql);
+      console.log('Database tables verified and ready on Neon PostgreSQL.');
       return;
     } catch (err) {
       console.warn('Could not connect to PostgreSQL database:', err.message);

@@ -22,6 +22,11 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
+  // Don't render top navbar on Landing page (LandingPage has its own dedicated floating nav)
+  if (location.pathname === '/') {
+    return null;
+  }
+
   return (
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 backdrop-blur-md bg-white/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { GraduationCap, Lock, Mail, ArrowRight } from 'lucide-react';
+import { GraduationCap, Lock, Mail, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -31,18 +31,33 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-xl shadow-slate-200/50">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50/60 via-white to-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative ambient background glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] overflow-hidden pointer-events-none -z-10">
+        <div className="absolute -top-20 left-1/3 w-[400px] h-[400px] bg-indigo-200/50 rounded-full blur-3xl opacity-60"></div>
+        <div className="absolute -top-10 right-1/4 w-[350px] h-[350px] bg-sky-200/40 rounded-full blur-3xl opacity-50"></div>
+      </div>
+
+      <div className="max-w-md w-full space-y-6 bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-3xl border border-slate-200/90 shadow-2xl shadow-indigo-100/60 relative">
+        {/* Back to Home Link */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors mb-2"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to Home
+        </Link>
+
         {/* Brand header */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-200 mb-4 hover:scale-105 transition-transform">
             <GraduationCap className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Welcome to <span className="text-indigo-600">JoinEazy</span>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            Sign In to <span className="text-indigo-600">JoinEazy</span>
           </h2>
-          <p className="mt-1.5 text-xs text-slate-500 font-medium">
-            Student, Group & Assignment Management Platform
+          <p className="mt-1 text-xs text-slate-500 font-medium">
+            Enter your credentials to access your student or professor portal
           </p>
         </div>
 

@@ -32,12 +32,13 @@ export default function AdminCoursesPage() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
+      setError('');
       const res = await api.get('/courses/my');
       if (res.data.success) {
-        setCourses(res.data.courses);
+        setCourses(res.data.courses || []);
       }
     } catch (err) {
-      setError('Failed to fetch your courses/subjects.');
+      setError(err.response?.data?.message || 'Failed to fetch your courses/subjects.');
       console.error(err);
     } finally {
       setLoading(false);

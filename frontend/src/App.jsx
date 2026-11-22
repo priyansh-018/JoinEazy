@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import StudentDashboard from './pages/StudentDashboard';
@@ -33,7 +34,7 @@ export default function App() {
           <main className="flex-1">
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<RootRedirect />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/courses/join/:code" element={<JoinCoursePage />} />
