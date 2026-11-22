@@ -1,0 +1,23 @@
+{
+  "name": "joineazy-monorepo",
+  "version": "1.0.0",
+  "description": "Joineazy Student, Group & Assignment Management System",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [
+    "joineazy",
+    "react",
+    "nodejs",
+    "express",
+    "postgresql",
+    "fullstack"
+  ],
+  "author": "Full Stack Intern Candidate",
+  "license": "MIT"
+}
