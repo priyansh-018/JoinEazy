@@ -53,9 +53,7 @@ const getMyCourses = async (req, res, next) => {
 
     if (user.role === 'admin') {
       const coursesRes = await db.query(
-        `SELECT c.*, u.name as professor_name,
-                (SELECT COUNT(*) FROM groups g WHERE g.course_id = c.id) as group_count,
-                (SELECT COUNT(*) FROM assignments a WHERE a.course_id = c.id) as assignment_count
+        `SELECT c.*, u.name as professor_name
          FROM courses c
          JOIN users u ON c.professor_id = u.id
          WHERE c.professor_id = $1
@@ -63,9 +61,27 @@ const getMyCourses = async (req, res, next) => {
         [user.id]
       );
 
+      const enrichedCourses = await Promise.all(
+        coursesRes.rows.map(async (course) => {
+          const groupCountRes = await db.query(
+            'SELECT COUNT(*) as count FROM groups WHERE course_id = $1',
+            [course.id]
+          );
+          const assignCountRes = await db.query(
+            'SELECT COUNT(*) as count FROM assignments WHERE course_id = $1',
+            [course.id]
+          );
+          return {
+            ...course,
+            group_count: parseInt(groupCountRes.rows[0].count, 10),
+            assignment_count: parseInt(assignCountRes.rows[0].count, 10)
+          };
+        })
+      );
+
       return res.json({
         success: true,
-        courses: coursesRes.rows
+        courses: enrichedCourses
       });
     }
 
