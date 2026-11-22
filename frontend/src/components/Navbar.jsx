@@ -6,7 +6,8 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  BookOpen
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -56,6 +57,17 @@ export default function Navbar() {
                     >
                       <LayoutDashboard className="w-4 h-4 mr-2" />
                       Dashboard
+                    </Link>
+                    <Link
+                      to="/admin/courses"
+                      className={`inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                        isActive('/admin/courses')
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Subjects / Courses
                     </Link>
                     <Link
                       to="/admin/assignments"

@@ -3,7 +3,7 @@ const db = require('../db/db');
 // Create an assignment (Admin / Professor)
 const createAssignment = async (req, res, next) => {
   try {
-    const { title, description, due_date, onedrive_link, target_type = 'all', group_ids = [] } = req.body;
+    const { title, description, due_date, onedrive_link, target_type = 'all', course_id, group_ids = [] } = req.body;
     const adminId = req.user.id;
 
     if (!title || !description || !due_date || !onedrive_link) {
@@ -20,12 +20,14 @@ const createAssignment = async (req, res, next) => {
       });
     }
 
+    const resolvedCourseId = course_id ? parseInt(course_id, 10) : null;
+
     // Insert assignment
     const assignRes = await db.query(
-      `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target_type)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target_type, course_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [title.trim(), description.trim(), new Date(due_date).toISOString(), onedrive_link.trim(), adminId, target_type]
+      [title.trim(), description.trim(), new Date(due_date).toISOString(), onedrive_link.trim(), adminId, target_type, resolvedCourseId]
     );
 
     const assignment = assignRes.rows[0];
@@ -55,7 +57,7 @@ const createAssignment = async (req, res, next) => {
 const updateAssignment = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, description, due_date, onedrive_link, target_type, group_ids } = req.body;
+    const { title, description, due_date, onedrive_link, target_type, course_id, group_ids } = req.body;
 
     const assignCheck = await db.query('SELECT * FROM assignments WHERE id = $1', [id]);
     if (assignCheck.rows.length === 0) {
@@ -69,13 +71,14 @@ const updateAssignment = async (req, res, next) => {
     const updatedDueDate = due_date !== undefined ? new Date(due_date).toISOString() : current.due_date;
     const updatedLink = onedrive_link !== undefined ? onedrive_link.trim() : current.onedrive_link;
     const updatedTarget = target_type !== undefined ? target_type : current.target_type;
+    const updatedCourseId = course_id !== undefined ? (course_id ? parseInt(course_id, 10) : null) : current.course_id;
 
     const updateRes = await db.query(
       `UPDATE assignments
-       SET title = $1, description = $2, due_date = $3, onedrive_link = $4, target_type = $5, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6
+       SET title = $1, description = $2, due_date = $3, onedrive_link = $4, target_type = $5, course_id = $6, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $7
        RETURNING *`,
-      [updatedTitle, updatedDesc, updatedDueDate, updatedLink, updatedTarget, id]
+      [updatedTitle, updatedDesc, updatedDueDate, updatedLink, updatedTarget, updatedCourseId, id]
     );
 
     // Update group mappings if target_type is specific_groups
@@ -122,11 +125,13 @@ const getAllAssignments = async (req, res, next) => {
       const totalGroupsRes = await db.query('SELECT COUNT(*) as count FROM groups');
       const totalGroupsCount = parseInt(totalGroupsRes.rows[0].count, 10);
 
-      // Get all assignments
+      // Get all assignments with course info
       const assignmentsRes = await db.query(
-        `SELECT a.*, u.name as professor_name
+        `SELECT a.*, u.name as professor_name,
+                c.name as course_name, c.course_code
          FROM assignments a
          LEFT JOIN users u ON a.created_by = u.id
+         LEFT JOIN courses c ON a.course_id = c.id
          ORDER BY a.due_date ASC`
       );
 
@@ -141,6 +146,14 @@ const getAllAssignments = async (req, res, next) => {
 
           let targetGroups = totalGroupsCount;
           let assignedGroupsList = [];
+
+          if (assign.course_id) {
+            const courseGrpCountRes = await db.query(
+              'SELECT COUNT(*) as count FROM groups WHERE course_id = $1',
+              [assign.course_id]
+            );
+            targetGroups = parseInt(courseGrpCountRes.rows[0].count, 10);
+          }
 
           if (assign.target_type === 'specific_groups') {
             const grps = await db.query(
@@ -168,7 +181,7 @@ const getAllAssignments = async (req, res, next) => {
     // Student View:
     // 1. Get student's group IDs
     const studentGroupsRes = await db.query(
-      `SELECT g.id, g.name, gm.role as member_role
+      `SELECT g.id, g.name, g.course_id, gm.role as member_role
        FROM groups g
        JOIN group_members gm ON g.id = gm.group_id
        WHERE gm.user_id = $1`,
@@ -180,9 +193,11 @@ const getAllAssignments = async (req, res, next) => {
 
     // 2. Fetch assignments assigned to 'all' OR assigned to student's groups
     let assignmentsQuery = `
-      SELECT DISTINCT a.*, u.name as professor_name
+      SELECT DISTINCT a.*, u.name as professor_name,
+             c.name as course_name, c.course_code
       FROM assignments a
       LEFT JOIN users u ON a.created_by = u.id
+      LEFT JOIN courses c ON a.course_id = c.id
       LEFT JOIN assignment_groups ag ON a.id = ag.assignment_id
       WHERE a.target_type = 'all'
     `;
@@ -258,9 +273,11 @@ const getAssignmentById = async (req, res, next) => {
     const user = req.user;
 
     const assignRes = await db.query(
-      `SELECT a.*, u.name as professor_name, u.email as professor_email
+      `SELECT a.*, u.name as professor_name, u.email as professor_email,
+              c.name as course_name, c.course_code
        FROM assignments a
        LEFT JOIN users u ON a.created_by = u.id
+       LEFT JOIN courses c ON a.course_id = c.id
        WHERE a.id = $1`,
       [id]
     );

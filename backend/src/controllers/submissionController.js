@@ -145,7 +145,12 @@ const getAssignmentSubmissions = async (req, res, next) => {
     let groupsQuery;
     let params = [];
     if (assignment.target_type === 'all') {
-      groupsQuery = 'SELECT id, name FROM groups ORDER BY name ASC';
+      if (assignment.course_id) {
+        groupsQuery = 'SELECT id, name FROM groups WHERE course_id = $1 ORDER BY name ASC';
+        params.push(assignment.course_id);
+      } else {
+        groupsQuery = 'SELECT id, name FROM groups ORDER BY name ASC';
+      }
     } else {
       groupsQuery = `
         SELECT g.id, g.name

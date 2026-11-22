@@ -14,6 +14,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminAssignmentsPage from './pages/AdminAssignmentsPage';
 import AdminSubmissionsPage from './pages/AdminSubmissionsPage';
 import AdminGroupsPage from './pages/AdminGroupsPage';
+import AdminCoursesPage from './pages/AdminCoursesPage';
+import JoinCoursePage from './pages/JoinCoursePage';
 
 function RootRedirect() {
   const { user, loading } = useAuth();
@@ -34,6 +36,7 @@ export default function App() {
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/courses/join/:code" element={<JoinCoursePage />} />
 
               {/* Student Routes */}
               <Route element={<ProtectedRoute allowedRoles={['student']} />}>
@@ -45,6 +48,7 @@ export default function App() {
               {/* Admin (Professor) Routes */}
               <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/courses" element={<AdminCoursesPage />} />
                 <Route path="/admin/assignments" element={<AdminAssignmentsPage />} />
                 <Route path="/admin/assignments/:assignment_id/submissions" element={<AdminSubmissionsPage />} />
                 <Route path="/admin/groups" element={<AdminGroupsPage />} />

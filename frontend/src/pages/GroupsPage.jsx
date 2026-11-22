@@ -20,6 +20,7 @@ import {
 export default function GroupsPage() {
   const { user } = useAuth();
   const [groups, setGroups] = useState([]);
+  const [availableCourses, setAvailableCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -28,6 +29,8 @@ export default function GroupsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDesc, setNewGroupDesc] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [courseCodeInput, setCourseCodeInput] = useState('');
 
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinCode, setJoinCode] = useState('');
@@ -39,9 +42,16 @@ export default function GroupsPage() {
   const fetchMyGroups = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/groups/my');
-      if (res.data.success) {
-        setGroups(res.data.groups);
+      const [groupsRes, coursesRes] = await Promise.all([
+        api.get('/groups/my'),
+        api.get('/courses/all')
+      ]);
+
+      if (groupsRes.data.success) {
+        setGroups(groupsRes.data.groups);
+      }
+      if (coursesRes.data.success) {
+        setAvailableCourses(coursesRes.data.courses);
       }
     } catch (err) {
       setError('Failed to fetch your groups.');
@@ -61,13 +71,17 @@ export default function GroupsPage() {
     try {
       const res = await api.post('/groups', {
         name: newGroupName,
-        description: newGroupDesc
+        description: newGroupDesc,
+        course_id: selectedCourseId || null,
+        course_join_code: courseCodeInput.trim() || null
       });
       if (res.data.success) {
         setSuccessMsg(`Group "${newGroupName}" created successfully!`);
         setShowCreateModal(false);
         setNewGroupName('');
         setNewGroupDesc('');
+        setSelectedCourseId('');
+        setCourseCodeInput('');
         fetchMyGroups();
       }
     } catch (err) {
@@ -190,6 +204,15 @@ export default function GroupsPage() {
                 {/* Header */}
                 <div className="flex justify-between items-start gap-3">
                   <div>
+                    {grp.course_name && (
+                      <div className="mb-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-semibold">
+                        <span className="font-mono font-bold">[{grp.course_code}]</span>
+                        <span>{grp.course_name}</span>
+                        {grp.professor_name && (
+                          <span className="text-slate-400 font-normal">• Prof. {grp.professor_name}</span>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-bold text-slate-900 tracking-tight">{grp.name}</h3>
                       {grp.my_role === 'leader' ? (
@@ -347,6 +370,36 @@ export default function GroupsPage() {
             </p>
 
             <form onSubmit={handleCreateGroup} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Subject / Course (Optional)
+                </label>
+                {availableCourses.length > 0 ? (
+                  <select
+                    value={selectedCourseId}
+                    onChange={(e) => setSelectedCourseId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  >
+                    <option value="">-- Choose Subject / Course (or enter code below) --</option>
+                    {availableCourses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        [{c.course_code}] {c.name} (Prof. {c.professor_name})
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    value={courseCodeInput}
+                    onChange={(e) => setCourseCodeInput(e.target.value.toUpperCase())}
+                    placeholder="Or enter Professor's Course Code (e.g. CS401-7M9K)"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 uppercase font-mono placeholder:normal-case placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   Group Name

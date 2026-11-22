@@ -12,21 +12,34 @@ const generateJoinCode = () => {
 
 const createGroup = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, course_id, course_join_code } = req.body;
     const userId = req.user.id;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Group name is required.' });
     }
 
+    let resolvedCourseId = course_id ? parseInt(course_id, 10) : null;
+
+    // If student provided a course join code instead of selecting a course
+    if (!resolvedCourseId && course_join_code && course_join_code.trim()) {
+      const courseRes = await db.query(
+        'SELECT id FROM courses WHERE UPPER(join_code) = $1',
+        [course_join_code.trim().toUpperCase()]
+      );
+      if (courseRes.rows.length > 0) {
+        resolvedCourseId = courseRes.rows[0].id;
+      }
+    }
+
     const joinCode = generateJoinCode();
 
-    // 1. Create group
+    // 1. Create group with course link
     const groupRes = await db.query(
-      `INSERT INTO groups (name, description, created_by, join_code)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO groups (name, description, course_id, created_by, join_code)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [name.trim(), description ? description.trim() : null, userId, joinCode]
+      [name.trim(), description ? description.trim() : null, resolvedCourseId, userId, joinCode]
     );
     const newGroup = groupRes.rows[0];
 
@@ -52,15 +65,19 @@ const getMyGroups = async (req, res, next) => {
     const userId = req.user.id;
 
     const groupsRes = await db.query(
-      `SELECT g.id, g.name, g.description, g.join_code, g.created_at,
+      `SELECT g.id, g.name, g.description, g.join_code, g.created_at, g.course_id,
               gm.role as my_role, gm.joined_at,
               u.name as creator_name,
+              c.name as course_name, c.course_code,
+              prof.name as professor_name,
               COUNT(gm_all.id) as member_count
        FROM groups g
        JOIN group_members gm ON g.id = gm.group_id AND gm.user_id = $1
        JOIN users u ON g.created_by = u.id
+       LEFT JOIN courses c ON g.course_id = c.id
+       LEFT JOIN users prof ON c.professor_id = prof.id
        LEFT JOIN group_members gm_all ON g.id = gm_all.group_id
-       GROUP BY g.id, g.name, g.description, g.join_code, g.created_at, gm.role, gm.joined_at, u.name
+       GROUP BY g.id, g.name, g.description, g.join_code, g.created_at, g.course_id, gm.role, gm.joined_at, u.name, c.name, c.course_code, prof.name
        ORDER BY g.created_at DESC`,
       [userId]
     );
@@ -285,19 +302,41 @@ const joinByCode = async (req, res, next) => {
 const getAllGroups = async (req, res, next) => {
   try {
     const groupsRes = await db.query(
-      `SELECT g.id, g.name, g.description, g.join_code, g.created_at,
+      `SELECT g.id, g.name, g.description, g.join_code, g.created_at, g.course_id,
               u.name as creator_name, u.email as creator_email,
+              c.name as course_name, c.course_code,
+              prof.name as professor_name,
               COUNT(gm.id) as member_count
        FROM groups g
        LEFT JOIN users u ON g.created_by = u.id
+       LEFT JOIN courses c ON g.course_id = c.id
+       LEFT JOIN users prof ON c.professor_id = prof.id
        LEFT JOIN group_members gm ON g.id = gm.group_id
-       GROUP BY g.id, g.name, g.description, g.join_code, g.created_at, u.name, u.email
+       GROUP BY g.id, g.name, g.description, g.join_code, g.created_at, g.course_id, u.name, u.email, c.name, c.course_code, prof.name
        ORDER BY g.created_at DESC`
+    );
+
+    // Attach members to each group for rich display
+    const groupsWithMembers = await Promise.all(
+      groupsRes.rows.map(async (grp) => {
+        const membersRes = await db.query(
+          `SELECT u.id, u.name, u.email, u.student_id, gm.role
+           FROM group_members gm
+           JOIN users u ON gm.user_id = u.id
+           WHERE gm.group_id = $1
+           ORDER BY gm.role DESC, u.name ASC`,
+          [grp.id]
+        );
+        return {
+          ...grp,
+          members: membersRes.rows
+        };
+      })
     );
 
     res.json({
       success: true,
-      groups: groupsRes.rows
+      groups: groupsWithMembers
     });
   } catch (error) {
     next(error);

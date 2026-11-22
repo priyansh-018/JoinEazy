@@ -67,9 +67,29 @@ A robust, role-based full-stack web application designed for **Joineazy** to emp
 
 ---
 
-## 🏛 System Architecture
+## 🏛 System Architecture & Subject-Based Group Linking
 
-The following diagram illustrates the request flow and component interaction:
+To support multi-professor environments where instructors teach multiple subjects, the platform incorporates an invite-link course structure:
+
+```mermaid
+flowchart TD
+    subgraph ProfessorFlow ["Professor Workflow"]
+        P1["Create Subject / Course<br>(e.g. CS401 Cloud Computing)"] --> P2["System Generates Unique Invite Link & Code<br>(e.g. joineazy.com/courses/join/CS401-KQZ5)"]
+        P2 --> P3["Professor Shares Link / Code with Students"]
+    end
+
+    subgraph StudentFlow ["Student Workflow"]
+        S1["Students Open Invite Link or Enter Code"] --> S2["Form Collaborative Project Group Under That Subject"]
+        S2 --> S3["Subject Badge & Professor Name Tagged on Group"]
+    end
+
+    subgraph AssignmentFlow ["Targeted Assignment Distribution"]
+        P3 --> A1["Professor Creates Assignment for Subject"]
+        S3 --> A2["Only Groups Enrolled in this Subject Appear in Checklist"]
+        A1 --> A2
+        A2 --> A3["Track Submissions by Subject Roster"]
+    end
+```
 
 ```mermaid
 flowchart TD
