@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SupportModal from '../components/SupportModal';
@@ -28,22 +28,34 @@ import {
   Clock,
   Send,
   Layers,
-  Sparkle
+  Sparkle,
+  Copy,
+  Zap,
+  TrendingUp,
+  AlertCircle
 } from 'lucide-react';
 
 export default function LandingPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Scroll tracking for parallax & rotational physics
+  // Scroll tracking for animations & parallax
   const [scrollY, setScrollY] = useState(0);
   const [activeFaq, setActiveFaq] = useState(null);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Interactive 2-step verification preview state inside the capsule
-  const [simStep, setSimStep] = useState(0); // 0: unsubmitted, 1: step 1 checked, 2: confirmed
+  // Hero interactive console tab: 'submission' | 'professor' | 'progress'
+  const [consoleTab, setConsoleTab] = useState('submission');
+
+  // Interactive 2-step verification simulation state
+  const [simStep1, setSimStep1] = useState(true);
+  const [simStep2, setSimStep2] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Interactive join code test box
+  const [testCode, setTestCode] = useState('');
+  const [codeTested, setCodeTested] = useState(false);
 
   useEffect(() => {
     let ticking = false;
@@ -61,12 +73,20 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Compute scroll-linked transformation factors
-  // 0 to 800px: Hero tilt to upright
-  const tiltAngle = Math.max(0, 22 - (scrollY / 400) * 22); // from 22deg to 0deg
-  const heroScale = Math.min(1.08, 1 + (scrollY / 1200) * 0.08);
-  const parallaxTextY1 = scrollY * 0.35;
-  const parallaxTextY2 = scrollY * 0.2;
+  const handleCopyDemoLink = () => {
+    navigator.clipboard.writeText('https://onedrive.live.com/?id=cs401-coursework-team4');
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleTestCodeSubmit = (e) => {
+    e.preventDefault();
+    if (!testCode.trim()) return;
+    setCodeTested(true);
+  };
+
+  // Parallax offsets
+  const parallaxHeader = scrollY * 0.2;
 
   const faqs = [
     {
@@ -93,32 +113,39 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1c1917] relative selection:bg-[#E11D48] selection:text-white font-sans overflow-x-hidden">
-      {/* Editorial Paper Grid Background */}
+      {/* Editorial Paper Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none paper-grain opacity-60 z-0"></div>
 
-      {/* LEFT FIXED DOCK NAVIGATION (Inspired by Lagunitas / Sandhill Studio style) */}
-      <aside className="fixed left-0 top-0 bottom-0 w-16 sm:w-20 border-r border-[#E6DFD5] bg-[#FAF7F2]/90 backdrop-blur-sm z-50 flex flex-col justify-between items-center py-6">
-        {/* Menu Toggle */}
+      {/* LEFT FIXED DOCK NAVIGATION */}
+      <aside className="fixed left-0 top-0 bottom-0 w-16 sm:w-20 border-r border-[#E6DFD5] bg-[#FAF7F2]/95 backdrop-blur-sm z-50 flex flex-col justify-between items-center py-6 shadow-xs">
         <div className="flex flex-col items-center gap-6">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-10 h-10 rounded-full border border-[#D5CCC0] hover:border-[#1c1917] flex items-center justify-center text-[#1c1917] hover:bg-white transition-all shadow-xs cursor-pointer group"
+            className="w-10 h-10 rounded-full border-2 border-[#1c1917] flex items-center justify-center text-[#1c1917] hover:bg-[#1c1917] hover:text-[#FAF7F2] transition-all cursor-pointer shadow-xs group"
             title="Open Menu"
           >
-            <Menu className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <Menu className="w-4 h-4 group-hover:scale-110 transition-transform" />
           </button>
 
           <a
-            href="#features"
-            className="w-10 h-10 rounded-full border border-transparent hover:border-[#D5CCC0] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all"
-            title="Jump to Features"
+            href="#demo"
+            className="w-10 h-10 rounded-full border border-stone-300 hover:border-[#1c1917] flex items-center justify-center text-stone-600 hover:text-[#1c1917] hover:bg-white transition-all cursor-pointer"
+            title="Jump to Interactive Demo"
+          >
+            <Zap className="w-4 h-4 text-[#E11D48]" />
+          </a>
+
+          <a
+            href="#pillars"
+            className="w-10 h-10 rounded-full border border-transparent hover:border-[#1c1917] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all cursor-pointer"
+            title="System Architecture"
           >
             <Layers className="w-4 h-4" />
           </a>
 
           <button
             onClick={() => setIsSupportOpen(true)}
-            className="w-10 h-10 rounded-full border border-transparent hover:border-[#D5CCC0] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all"
+            className="w-10 h-10 rounded-full border border-transparent hover:border-[#1c1917] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all cursor-pointer"
             title="Direct Support Inbox"
           >
             <HelpCircle className="w-4 h-4" />
@@ -142,13 +169,13 @@ export default function LandingPage() {
       {/* QUICK MENU DRAWER */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 bg-[#1c1917]/50 backdrop-blur-sm flex items-start pl-16 sm:pl-20 animate-in fade-in duration-200">
-          <div className="w-80 h-full bg-[#FAF7F2] border-r border-[#E6DFD5] p-8 flex flex-col justify-between shadow-2xl">
+          <div className="w-80 h-full bg-[#FAF7F2] border-r-2 border-[#1c1917] p-8 flex flex-col justify-between shadow-2xl">
             <div className="space-y-8">
-              <div className="flex justify-between items-center">
-                <span className="font-display text-2xl tracking-wider text-[#1c1917]">NAVIGATION</span>
+              <div className="flex justify-between items-center border-b-2 border-[#1c1917] pb-4">
+                <span className="font-display text-2xl tracking-wider text-[#1c1917]">QUICK MENU</span>
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="p-1 rounded-lg hover:bg-stone-200 text-stone-600 transition-colors"
+                  className="p-1 rounded-lg hover:bg-stone-200 text-stone-600 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -160,89 +187,86 @@ export default function LandingPage() {
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
                 >
-                  01. OVERVIEW
+                  01. PLATFORM OVERVIEW
+                </a>
+                <a
+                  href="#demo"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
+                >
+                  02. INTERACTIVE DEMO
                 </a>
                 <a
                   href="#verification"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
                 >
-                  02. 2-STEP VERIFY
+                  03. TWO-STEP VERIFY
                 </a>
                 <a
-                  href="#features"
+                  href="#pillars"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
                 >
-                  03. SYSTEM PILLARS
-                </a>
-                <a
-                  href="#roles"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
-                >
-                  04. ROLE LINEUP
+                  04. FOUR PILLARS
                 </a>
                 <a
                   href="#faq"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
                 >
-                  05. FREQUENT QUESTIONS
+                  05. FAQ
                 </a>
               </nav>
             </div>
 
-            <div className="pt-6 border-t border-[#E6DFD5] space-y-3">
+            <div className="pt-6 border-t-2 border-[#1c1917] space-y-3">
               <div className="text-xs text-stone-500 font-semibold uppercase tracking-wider">
-                Support & Contact
+                Direct Help Desk
               </div>
               <p className="text-xs text-stone-700">
-                Inquiries routed to <span className="font-bold text-[#E11D48]">priyansh191882@gmail.com</span>
+                Email support: <span className="font-bold text-[#E11D48]">priyansh191882@gmail.com</span>
               </p>
               <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsSupportOpen(true);
                 }}
-                className="w-full py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-[#FAF7F2] text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                className="w-full py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-[#FAF7F2] text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-sm"
               >
-                Open Support Ticket
+                Send Support Ticket
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MAIN CONTENT CONTAINER (Padded for Left Fixed Dock) */}
+      {/* MAIN CONTAINER */}
       <div className="pl-16 sm:pl-20 min-h-screen relative z-10">
         
         {/* TOP BAR */}
-        <header className="h-20 border-b border-[#E6DFD5] px-6 sm:px-12 flex items-center justify-between sticky top-0 bg-[#FAF7F2]/90 backdrop-blur-md z-40">
-          {/* Logo & Stamp */}
+        <header className="h-20 border-b border-[#E6DFD5] px-6 sm:px-12 flex items-center justify-between sticky top-0 bg-[#FAF7F2]/95 backdrop-blur-md z-40">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2 group">
               <span className="font-display text-3xl sm:text-4xl tracking-wider text-[#1c1917] group-hover:text-[#E11D48] transition-colors">
                 JOINEAZY
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full border border-[#D5CCC0] text-stone-600 hidden sm:inline-block">
-                STUDENT & GROUP SYSTEM
+              <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full border border-[#D5CCC0] text-stone-600 hidden sm:inline-block">
+                STUDENT &bull; GROUP &bull; ASSIGNMENT
               </span>
             </Link>
 
-            {/* Vintage Circular Stamp Badge */}
             <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-[#E6DFD5]">
-              <div className="w-8 h-8 rounded-full border border-dashed border-[#1c1917] flex items-center justify-center font-display text-[10px] text-[#1c1917]">
+              <div className="w-8 h-8 rounded-full border border-dashed border-[#1c1917] flex items-center justify-center font-display text-[11px] text-[#1c1917]">
                 2026
               </div>
               <div className="text-[10px] font-bold text-stone-500 leading-tight">
-                NEON CLOUD DB<br />
-                <span className="text-emerald-700">PERSISTENT</span>
+                NEON CLOUD POSTGRESQL<br />
+                <span className="text-emerald-700 font-mono">100% PERSISTENT</span>
               </div>
             </div>
           </div>
 
-          {/* Right Action Pill Buttons */}
           <div className="flex items-center gap-3">
             {user ? (
               <Link
@@ -256,13 +280,13 @@ export default function LandingPage() {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 border border-[#D5CCC0] hover:border-[#1c1917] text-[#1c1917] text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-white transition-all cursor-pointer"
+                  className="px-4 py-2 border-2 border-[#1c1917] text-[#1c1917] hover:bg-[#1c1917] hover:text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2 bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer"
+                  className="px-5 py-2 bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#1c1917] transition-all cursor-pointer"
                 >
                   Get Started
                 </Link>
@@ -271,342 +295,477 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* SECTION 1: EDITORIAL HERO WITH 3D ROTATING CENTERPIECE */}
-        <section id="overview" className="relative min-h-[90vh] flex flex-col justify-between p-6 sm:p-12 overflow-hidden border-b border-[#E6DFD5]">
+        {/* HERO SECTION WITH STRAIGHT, SLEEK INTERACTIVE CONSOLE */}
+        <section id="overview" className="relative p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] overflow-hidden">
           
-          {/* GIANT PARALLAX CONDENSED BACKGROUND TYPOGRAPHY (Like the Lagunitas "UNLIMITED RELEASE IPA") */}
+          {/* Subtle Parallax Background Typography */}
           <div
-            className="absolute inset-0 pointer-events-none select-none flex flex-col justify-center items-center opacity-[0.14] text-[#E11D48] font-display text-[15vw] sm:text-[18vw] leading-[0.8] tracking-tight whitespace-nowrap -z-10"
-            style={{ transform: `translateY(-${parallaxTextY1}px)` }}
+            className="absolute inset-0 pointer-events-none select-none flex flex-col justify-center items-center opacity-[0.08] text-[#1c1917] font-display text-[15vw] sm:text-[18vw] leading-[0.85] tracking-tight whitespace-nowrap -z-10"
+            style={{ transform: `translateY(-${parallaxHeader}px)` }}
           >
             <div>ACADEMIC</div>
-            <div>WORKFLOW</div>
+            <div>COLLABORATION</div>
           </div>
 
-          {/* TOP ACCENT TAG */}
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-stone-500">
-            <span className="w-2 h-2 rounded-full bg-[#E11D48] animate-ping"></span>
-            <span>Task 1 &bull; Student, Group & Assignment Management Platform</span>
-          </div>
-
-          {/* MAIN HERO CENTER AREA WITH ROTATING 3D TABLET CAPSULE */}
-          <div className="relative my-12 flex items-center justify-center">
+          <div className="max-w-6xl mx-auto space-y-10">
             
-            {/* The 3D Floating Academic Device Capsule */}
-            <div
-              className="relative w-full max-w-lg transition-transform duration-300 ease-out z-20"
-              style={{
-                transform: `rotate(${tiltAngle}deg) scale(${heroScale})`,
-                perspective: '1000px'
-              }}
-            >
-              {/* Dynamic Drop Shadow beneath the tilted centerpiece */}
-              <div
-                className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-stone-900/25 blur-2xl rounded-full transition-all"
-                style={{
-                  transform: `translateX(-50%) scale(${1 - tiltAngle / 60})`,
-                  opacity: 0.6 + (1 - tiltAngle / 22) * 0.3
-                }}
-              ></div>
-
-              {/* The Tablet / Capsule Body */}
-              <div className="bg-gradient-to-b from-stone-900 via-stone-800 to-black text-white rounded-3xl p-6 sm:p-7 shadow-2xl border-4 border-stone-800 ring-1 ring-white/20 relative overflow-hidden">
-                {/* Gloss Reflection Overlay */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-
-                {/* Device Screen Header */}
-                <div className="flex justify-between items-center pb-4 border-b border-white/10 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                    <span className="font-mono text-stone-300 text-[11px]">JOINEAZY LIVE CORE</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-stone-300 font-mono text-[10px]">
-                    PORT 3000 &bull; NEON DB
-                  </span>
-                </div>
-
-                {/* Center Content: Interactive 2-Step Simulation on Device */}
-                <div className="py-6 space-y-4">
-                  <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider flex justify-between items-center">
-                    <span>Course: CS401 &bull; Cloud Computing</span>
-                    <span className="text-[#E11D48] font-bold">DUE IN 3 DAYS</span>
-                  </div>
-
-                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
-                    Milestone 2: Database & Backend Architecture
-                  </h3>
-
-                  {/* External OneDrive Directory pill */}
-                  <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 text-stone-300">
-                      <FolderOpen className="w-4 h-4 text-sky-400 shrink-0" />
-                      <span className="truncate max-w-[220px]">onedrive.live.com/?id=cs401-groups</span>
-                    </div>
-                    <span className="text-[10px] uppercase font-bold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md">
-                      OneDrive
-                    </span>
-                  </div>
-
-                  {/* Two-Step Verification Progress on Screen */}
-                  <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-2">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-stone-300">Submission Verification State:</span>
-                      <span className={simStep === 2 ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                        {simStep === 2 ? 'Verified & Timestamped' : simStep === 1 ? 'Step 1 Confirmed' : 'Pending Upload'}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <button
-                        onClick={() => setSimStep(simStep === 0 ? 1 : 0)}
-                        className={`py-2 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                          simStep >= 1
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-white/10 hover:bg-white/20 text-stone-300'
-                        }`}
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Step 1: Uploaded</span>
-                      </button>
-
-                      <button
-                        onClick={() => setSimStep(simStep === 1 ? 2 : simStep === 2 ? 0 : 0)}
-                        disabled={simStep < 1}
-                        className={`py-2 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                          simStep === 2
-                            ? 'bg-[#E11D48] text-white'
-                            : simStep === 1
-                            ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse'
-                            : 'bg-white/5 text-stone-600 cursor-not-allowed'
-                        }`}
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Step 2: Confirm</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Device Screen Footer */}
-                <div className="pt-3 border-t border-white/10 flex justify-between items-center text-[11px] text-stone-400">
-                  <span className="font-mono">Team: Binary Pioneers (4 members)</span>
-                  <span className="text-emerald-400 font-bold font-mono">100% PERSISTED</span>
-                </div>
+            {/* Top Tagline Badge */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#D5CCC0] text-xs font-bold uppercase tracking-wider text-stone-700 shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-[#E11D48] animate-pulse"></span>
+                <span>Full Stack Technical Task &bull; Role-Based Management System</span>
+              </div>
+              <div className="font-script text-2xl text-[#E11D48]">
+                Streamlined group formation &amp; submission accountability
               </div>
             </div>
-          </div>
 
-          {/* HERO BOTTOM SPLIT: EDITORIAL COPY (LEFT) + SPECS CARD (RIGHT) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pt-8">
-            
-            {/* Left: Handwritten script + Bold Headline */}
-            <div className="lg:col-span-7 space-y-3">
-              <div className="font-script text-3xl sm:text-4xl text-[#E11D48] -rotate-2">
-                Effortless coursework management &bull; Built for modern universities
-              </div>
+            {/* Hero Main Headline */}
+            <div className="space-y-4 max-w-4xl">
               <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl tracking-tight text-[#1c1917] leading-[0.95]">
-                STUDENT, GROUP &amp; ASSIGNMENT SYSTEM
+                EFFORTLESS COURSEWORK, GROUP FORMATION &amp; VERIFIED SUBMISSIONS.
               </h1>
-              <p className="text-sm sm:text-base text-stone-600 max-w-xl font-medium leading-relaxed">
-                Connect students into collaborative groups with unique invite links, link external OneDrive submission folders, enforce two-step submission verification, and monitor real-time group progress.
+              <p className="text-base sm:text-lg text-stone-600 font-medium max-w-2xl leading-relaxed">
+                Connect students with unique invite links, link shared OneDrive folders, enforce two-step submission verification, and isolate coursework by professor subject.
               </p>
 
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Link
                   to="/register"
-                  className="px-6 py-3.5 bg-[#1c1917] hover:bg-[#E11D48] text-[#FAF7F2] font-display text-lg tracking-wider rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-7 py-3.5 bg-[#1c1917] hover:bg-[#E11D48] text-[#FAF7F2] font-display text-lg tracking-wider rounded-xl shadow-[4px_4px_0px_0px_#E11D48] hover:shadow-[6px_6px_0px_0px_#1c1917] transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>LAUNCH WORKSPACE</span>
+                  <span>GET STARTED FREE</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <a
-                  href="#verification"
-                  className="px-6 py-3.5 border-2 border-[#1c1917] hover:bg-[#1c1917] hover:text-[#FAF7F2] text-[#1c1917] font-display text-lg tracking-wider rounded-xl transition-all cursor-pointer"
+                  href="#demo"
+                  className="px-6 py-3.5 border-2 border-[#1c1917] hover:bg-white text-[#1c1917] font-display text-lg tracking-wider rounded-xl transition-all cursor-pointer shadow-xs"
                 >
-                  HOW IT WORKS
+                  TEST INTERACTIVE DEMO
                 </a>
               </div>
             </div>
 
-            {/* Right: Clean Editorial Specs Card (Framed like the ABV 6.2% Box in the video) */}
-            <div className="lg:col-span-5 bg-[#FAF7F2] border-2 border-[#1c1917] p-6 rounded-2xl shadow-[6px_6px_0px_0px_#1c1917] space-y-4">
-              <div className="flex justify-between items-center border-b-2 border-[#1c1917] pb-3">
-                <span className="font-display text-xl tracking-wider text-[#1c1917]">SYSTEM SPECIFICATIONS</span>
-                <span className="text-[10px] font-mono font-bold bg-[#E11D48] text-white px-2 py-0.5 rounded">V1.0 LIVE</span>
+            {/* THE HERO SHOWCASE: STRAIGHT, HIGH-TECH INTERACTIVE WORKSPACE CONSOLE */}
+            <div className="relative pt-6">
+              
+              {/* Outer Decorative Frame */}
+              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-2 sm:p-3 shadow-[8px_8px_0px_0px_#1c1917] relative">
+                
+                {/* Console Top Toolbar */}
+                <div className="bg-[#FAF7F2] border-b-2 border-[#1c1917] px-4 py-3 rounded-2xl flex flex-wrap justify-between items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-rose-500 border border-stone-800"></div>
+                      <div className="w-3 h-3 rounded-full bg-amber-400 border border-stone-800"></div>
+                      <div className="w-3 h-3 rounded-full bg-emerald-500 border border-stone-800"></div>
+                    </div>
+                    <span className="font-mono text-xs font-bold text-stone-800 tracking-tight">
+                      JOINEAZY LIVE CONSOLE &bull; v1.0
+                    </span>
+                  </div>
+
+                  {/* Interactive Switcher Tabs */}
+                  <div className="flex bg-white p-1 rounded-xl border border-stone-300 text-xs font-bold">
+                    <button
+                      onClick={() => setConsoleTab('submission')}
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        consoleTab === 'submission'
+                          ? 'bg-[#1c1917] text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      Two-Step Verification
+                    </button>
+                    <button
+                      onClick={() => setConsoleTab('professor')}
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        consoleTab === 'professor'
+                          ? 'bg-[#1c1917] text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      Professor Course Links
+                    </button>
+                    <button
+                      onClick={() => setConsoleTab('progress')}
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        consoleTab === 'progress'
+                          ? 'bg-[#1c1917] text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      Student Badges &amp; Metrics
+                    </button>
+                  </div>
+                </div>
+
+                {/* Console Screen Inner Content */}
+                <div className="p-6 sm:p-8 bg-[#18181B] text-white rounded-2xl space-y-6 mt-2 relative overflow-hidden">
+                  
+                  {/* TAB 1: TWO-STEP VERIFICATION PREVIEW */}
+                  {consoleTab === 'submission' && (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                      <div className="flex flex-wrap justify-between items-start gap-4 pb-4 border-b border-stone-800">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#E11D48] text-white font-mono text-[10px] font-bold">
+                              CS401 &bull; CLOUD COMPUTING
+                            </span>
+                            <span className="text-stone-400 font-mono text-xs">Assigned to: Binary Pioneers (Group #4)</span>
+                          </div>
+                          <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                            Milestone 2: Distributed Database Architecture
+                          </h3>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[11px] font-mono text-amber-400 font-bold block">DEADLINE APPROACHING</span>
+                          <span className="text-xs text-stone-400">Due Nov 29, 2026 &bull; 11:59 PM</span>
+                        </div>
+                      </div>
+
+                      {/* OneDrive Link Card */}
+                      <div className="p-4 rounded-xl bg-stone-900 border border-stone-700 flex flex-wrap justify-between items-center gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                            <FolderOpen className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                              Professor's Designated OneDrive Folder Link
+                            </span>
+                            <span className="font-mono text-xs text-stone-200">
+                              https://onedrive.live.com/?id=cs401-coursework-team4
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleCopyDemoLink}
+                          className="px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 border border-stone-600 text-xs font-bold text-stone-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedLink ? 'Copied Link' : 'Copy Link'}</span>
+                        </button>
+                      </div>
+
+                      {/* Interactive Two-Step Verification Control Box */}
+                      <div className="p-5 rounded-2xl bg-stone-900/90 border border-stone-700 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold uppercase tracking-wider text-stone-300">
+                            Two-Step Verification Protocol State:
+                          </span>
+                          <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full ${
+                            simStep1 && simStep2
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : simStep1
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              : 'bg-stone-800 text-stone-400'
+                          }`}>
+                            {simStep1 && simStep2 ? '100% VERIFIED & TIMESTAMPED' : simStep1 ? 'STEP 1 COMPLETE &bull; STEP 2 PENDING' : 'AWAITING STEP 1'}
+                          </span>
+                        </div>
+
+                        {/* Interactive Buttons */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <button
+                            onClick={() => setSimStep1(!simStep1)}
+                            className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all cursor-pointer ${
+                              simStep1
+                                ? 'bg-emerald-950/40 border-emerald-500/60 text-white'
+                                : 'bg-stone-800/80 border-stone-700 text-stone-400 hover:border-stone-500'
+                            }`}
+                          >
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
+                              simStep1 ? 'bg-emerald-500 text-stone-950' : 'border border-stone-600'
+                            }`}>
+                              {simStep1 && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+                            <div className="text-xs">
+                              <span className="font-bold text-white block">Step 1: Upload Check</span>
+                              <span className="text-stone-400 text-[11px]">"I confirm all team files are placed in OneDrive."</span>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              if (!simStep1) return;
+                              setSimStep2(!simStep2);
+                            }}
+                            disabled={!simStep1}
+                            className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all cursor-pointer ${
+                              !simStep1
+                                ? 'bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed opacity-60'
+                                : simStep2
+                                ? 'bg-rose-950/40 border-[#E11D48] text-white'
+                                : 'bg-stone-800/80 border-amber-500/50 text-stone-200 hover:border-amber-400 animate-pulse'
+                            }`}
+                          >
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
+                              simStep2 ? 'bg-[#E11D48] text-white' : 'border border-stone-600'
+                            }`}>
+                              {simStep2 && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+                            <div className="text-xs">
+                              <span className="font-bold text-white block">Step 2: Final Submission Lock</span>
+                              <span className="text-stone-400 text-[11px]">Locks submission timestamp in cloud Neon DB.</span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Team Peer Confirmations List */}
+                      <div className="pt-2 flex flex-wrap justify-between items-center text-xs text-stone-400">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-stone-300">Team Members:</span>
+                          <span className="px-2 py-0.5 rounded-md bg-stone-800 text-stone-300 text-[11px]">Alex Rivera (Leader) &bull; Verified</span>
+                          <span className="px-2 py-0.5 rounded-md bg-stone-800 text-stone-300 text-[11px]">Jordan Lee &bull; Verified</span>
+                          <span className="px-2 py-0.5 rounded-md bg-stone-800 text-amber-400 text-[11px]">Morgan Wu &bull; Pending</span>
+                        </div>
+                        <span className="font-mono text-emerald-400 font-bold text-[11px]">
+                          NEON CLOUD SYNCED
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 2: PROFESSOR COURSE LINKS */}
+                  {consoleTab === 'professor' && (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                      <div className="flex justify-between items-center pb-4 border-b border-stone-800">
+                        <div>
+                          <span className="text-[11px] font-mono text-[#E11D48] font-bold uppercase tracking-wider block">
+                            PROFESSOR MANAGEMENT PORTAL
+                          </span>
+                          <h3 className="text-2xl font-black text-white">Course &amp; Subject Invite Links</h3>
+                        </div>
+                        <span className="px-3 py-1 bg-white/10 rounded-xl text-xs font-mono text-stone-300">
+                          Active Courses: 3
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-stone-900 border border-stone-700 space-y-2">
+                          <div className="flex justify-between items-start">
+                            <span className="font-bold text-white text-sm">CS401 &bull; Cloud Computing</span>
+                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-mono rounded">
+                              4 Groups
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-400">Shareable Invite Link for students:</p>
+                          <div className="p-2 rounded bg-black font-mono text-[11px] text-stone-300 truncate">
+                            joineazy.com/courses/join/CS401-7M9K
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-stone-900 border border-stone-700 space-y-2">
+                          <div className="flex justify-between items-start">
+                            <span className="font-bold text-white text-sm">MATH302 &bull; Linear Algebra</span>
+                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-mono rounded">
+                              6 Groups
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-400">Shareable Invite Link for students:</p>
+                          <div className="p-2 rounded bg-black font-mono text-[11px] text-stone-300 truncate">
+                            joineazy.com/courses/join/MATH-9R2B
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-stone-900/50 border border-dashed border-stone-700 text-xs text-stone-300 flex items-center justify-between">
+                        <span>Groups created via these links are automatically categorized under their subject.</span>
+                        <span className="font-bold text-[#E11D48]">Zero Mixed Rosters</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 3: PROGRESS & METRICS */}
+                  {consoleTab === 'progress' && (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                      <div className="flex justify-between items-center pb-4 border-b border-stone-800">
+                        <div>
+                          <span className="text-[11px] font-mono text-emerald-400 font-bold uppercase tracking-wider block">
+                            REAL-TIME ANALYTICS
+                          </span>
+                          <h3 className="text-2xl font-black text-white">Cohort Completion &amp; Progress Meters</h3>
+                        </div>
+                        <span className="font-display text-2xl text-emerald-400">85% COMPLETE</span>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-mono text-stone-300">
+                          <span>Verified Cohort Submissions</span>
+                          <span>17 of 20 Groups</span>
+                        </div>
+                        <div className="w-full h-3 rounded-full bg-stone-800 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-emerald-500 to-[#E11D48] w-[85%] rounded-full transition-all duration-500"></div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3 text-center text-xs">
+                        <div className="p-3 rounded-xl bg-stone-900 border border-stone-800">
+                          <span className="text-stone-400 block text-[10px]">TOTAL GROUPS</span>
+                          <span className="font-display text-2xl text-white">24</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-stone-900 border border-stone-800">
+                          <span className="text-emerald-400 block text-[10px]">CONFIRMED</span>
+                          <span className="font-display text-2xl text-emerald-400">17</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-stone-900 border border-stone-800">
+                          <span className="text-amber-400 block text-[10px]">PENDING</span>
+                          <span className="font-display text-2xl text-amber-400">3</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">VERIFICATION</div>
-                  <div className="font-display text-3xl sm:text-4xl text-[#1c1917]">2-STEP</div>
-                  <div className="text-[11px] text-stone-600 mt-0.5">Two-step check eliminates accidental or premature submissions.</div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">ISOLATION</div>
-                  <div className="font-display text-3xl sm:text-4xl text-[#E11D48]">100%</div>
-                  <div className="text-[11px] text-stone-600 mt-0.5">Unique Course Invite Links isolate groups per subject.</div>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-[#D5CCC0] flex justify-between items-center text-xs text-stone-600">
-                <span className="font-mono font-semibold">STORAGE: Neon PostgreSQL</span>
-                <span className="font-bold text-emerald-700">&bull; ZERO DATA LOSS</span>
-              </div>
             </div>
 
           </div>
 
         </section>
 
-        {/* SECTION 2: THE TWO-STEP VERIFICATION ENGINE (Parallax Header like MOUTHFEELS) */}
-        <section id="verification" className="relative p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] overflow-hidden">
-          
-          {/* Big Background Parallax Text */}
-          <div
-            className="absolute inset-0 pointer-events-none select-none flex justify-center items-center opacity-[0.12] text-[#1c1917] font-display text-[16vw] leading-none tracking-tight whitespace-nowrap -z-10"
-            style={{ transform: `translateY(${parallaxTextY2 - 80}px)` }}
-          >
-            TWO-STEP VERIFY
+        {/* DYNAMIC SCROLLING MARQUEE BANNER (Continuous Smooth Animation) */}
+        <div className="py-4 bg-[#1c1917] text-[#FAF7F2] overflow-hidden whitespace-nowrap border-y-2 border-[#1c1917]">
+          <div className="animate-marquee font-display text-xl sm:text-2xl tracking-widest uppercase flex items-center gap-8 select-none">
+            <span>&bull; TWO-STEP VERIFICATION PROTOCOL</span>
+            <span className="text-[#E11D48]">&bull; ONEDRIVE DIRECT LINKING</span>
+            <span>&bull; ISOLATED PROFESSOR COURSES</span>
+            <span className="text-emerald-400">&bull; CLOUD NEON POSTGRESQL</span>
+            <span>&bull; INDIVIDUAL PARTICIPATION TRACKING</span>
+            <span className="text-amber-400">&bull; REAL-TIME PROGRESS BARS</span>
+            <span>&bull; TWO-STEP VERIFICATION PROTOCOL</span>
+            <span className="text-[#E11D48]">&bull; ONEDRIVE DIRECT LINKING</span>
+            <span>&bull; ISOLATED PROFESSOR COURSES</span>
+            <span className="text-emerald-400">&bull; CLOUD NEON POSTGRESQL</span>
           </div>
+        </div>
 
-          <div className="max-w-6xl mx-auto space-y-12">
+        {/* SECTION 2: INTERACTIVE DEMO TEST LAB */}
+        <section id="demo" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] bg-[#F5F0E8]/40">
+          <div className="max-w-5xl mx-auto space-y-10">
             
             <div className="text-center space-y-2">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-[#E11D48]">
-                CORE SUBMISSION PROTOCOL
+                TRY IT YOURSELF
               </span>
-              <h2 className="font-display text-4xl sm:text-6xl text-[#1c1917] tracking-tight">
-                HOW TWO-STEP VERIFICATION WORKS
+              <h2 className="font-display text-4xl sm:text-5xl text-[#1c1917] tracking-tight">
+                TEST A COURSE OR GROUP JOIN CODE
               </h2>
-              <p className="text-sm sm:text-base text-stone-600 max-w-2xl mx-auto font-medium">
-                Eliminate the confusion of missed deadlines and incomplete group work with our foolproof submission protocol.
+              <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto font-medium">
+                Experience how student enrollment works by trying an invite code right now:
               </p>
             </div>
 
-            {/* 3 Step Editorial Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-7 shadow-[4px_4px_0px_0px_#1c1917] space-y-4 hover:-translate-y-1 transition-transform">
-                <div className="w-12 h-12 rounded-2xl bg-[#1c1917] text-[#FAF7F2] font-display text-2xl flex items-center justify-center">
-                  01
+            <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_#1c1917] space-y-6 max-w-2xl mx-auto">
+              <form onSubmit={handleTestCodeSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    Enter Invite or Join Code (e.g. <button type="button" onClick={() => setTestCode('CS401-7M9K')} className="text-[#E11D48] underline cursor-pointer">CS401-7M9K</button> or <button type="button" onClick={() => setTestCode('GRP-8812')} className="text-[#E11D48] underline cursor-pointer">GRP-8812</button>)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={testCode}
+                      onChange={(e) => {
+                        setTestCode(e.target.value);
+                        setCodeTested(false);
+                      }}
+                      placeholder="e.g. CS401-7M9K"
+                      className="flex-1 px-4 py-3 rounded-xl border-2 border-[#1c1917] font-mono text-sm uppercase font-bold focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
+                    />
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-base tracking-wider rounded-xl transition-colors cursor-pointer shadow-sm"
+                    >
+                      VERIFY CODE
+                    </button>
+                  </div>
                 </div>
-                <h3 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  UPLOAD TO ONEDRIVE
-                </h3>
-                <p className="text-xs text-stone-600 leading-relaxed font-medium">
-                  Students access the direct OneDrive folder URL designated by their professor. Upload code, PDFs, diagrams, or zip archives without file size limits.
-                </p>
-                <div className="pt-2 text-[11px] font-mono font-bold text-sky-700 bg-sky-50 p-2.5 rounded-xl border border-sky-200">
-                  Direct OneDrive Directory Link
-                </div>
-              </div>
+              </form>
 
-              <div className="bg-white border-2 border-[#E11D48] rounded-3xl p-7 shadow-[4px_4px_0px_0px_#E11D48] space-y-4 hover:-translate-y-1 transition-transform relative">
-                <div className="absolute top-4 right-4 bg-[#E11D48] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
-                  Step 1
+              {codeTested && (
+                <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <span>Valid Code Recognized: {testCode.toUpperCase()}</span>
+                  </div>
+                  <p className="text-xs text-emerald-800">
+                    Course: <span className="font-bold">CS401 Cloud Computing</span> &bull; Professor: <span className="font-bold">Prof. Priyansh</span>. Ready to create or join group under this syllabus!
+                  </p>
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#E11D48] hover:underline pt-1"
+                  >
+                    <span>Sign up or login to enter this course</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-[#E11D48] text-white font-display text-2xl flex items-center justify-center">
-                  02
-                </div>
-                <h3 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  INITIATE CONFIRMATION
-                </h3>
-                <p className="text-xs text-stone-600 leading-relaxed font-medium">
-                  The team leader toggles "Yes, I have submitted to OneDrive" inside the modal and adds optional release notes for the professor.
-                </p>
-                <div className="pt-2 text-[11px] font-mono font-bold text-[#E11D48] bg-rose-50 p-2.5 rounded-xl border border-rose-200">
-                  First-Pass Checkpoint &bull; Logged
-                </div>
-              </div>
-
-              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-7 shadow-[4px_4px_0px_0px_#1c1917] space-y-4 hover:-translate-y-1 transition-transform">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-700 text-white font-display text-2xl flex items-center justify-center">
-                  03
-                </div>
-                <h3 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  PEER SYNC &amp; BADGES
-                </h3>
-                <p className="text-xs text-stone-600 leading-relaxed font-medium">
-                  Group members receive immediate notification to confirm their individual participation. Visual progress meters fill to 100% and award verified badges.
-                </p>
-                <div className="pt-2 text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-                  Individual Timestamp Verification
-                </div>
-              </div>
-
+              )}
             </div>
 
           </div>
-
         </section>
 
-        {/* SECTION 3: SYSTEM PILLARS WITH INK-STAMP ACCENTS (Like the hops/malt splashes in the video) */}
-        <section id="features" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] bg-[#F5F0E8]/50">
+        {/* SECTION 3: SYSTEM ARCHITECTURE PILLARS */}
+        <section id="pillars" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5]">
           <div className="max-w-6xl mx-auto space-y-12">
             
             <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b-2 border-[#1c1917] pb-6">
               <div>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">
-                  ARCHITECTURAL ADVANTAGES
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#E11D48]">
+                  SYSTEM DESIGN
                 </span>
                 <h2 className="font-display text-4xl sm:text-5xl text-[#1c1917] tracking-tight">
-                  THE FOUR SYSTEM PILLARS
+                  THE FOUR CORE ADVANTAGES
                 </h2>
               </div>
-              <div className="font-script text-2xl text-[#E11D48]">
-                Engineered for clarity and accountability
+              <div className="font-script text-2xl text-stone-500">
+                Designed for precision, scalability, and ease
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               
-              {/* Pillar 1 */}
-              <div className="bg-[#FAF7F2] border border-[#D5CCC0] rounded-2xl p-6 space-y-3 relative overflow-hidden group hover:border-[#1c1917] transition-all">
-                <div className="w-10 h-10 rounded-xl bg-[#E11D48] text-white flex items-center justify-center font-bold">
-                  <Share2 className="w-5 h-5" />
+              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-3 hover:-translate-y-1 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-[#E11D48] text-white flex items-center justify-center font-bold">
+                  <Share2 className="w-6 h-6" />
                 </div>
-                <h4 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  COURSE INVITE LINKS
-                </h4>
+                <h4 className="font-display text-2xl text-[#1c1917]">COURSE LINKS</h4>
                 <p className="text-xs text-stone-600 font-medium leading-relaxed">
                   Professors generate unique codes (e.g. <span className="font-mono font-bold text-stone-900">CS401-7M9K</span>) that keep students and groups strictly segregated by subject.
                 </p>
               </div>
 
-              {/* Pillar 2 */}
-              <div className="bg-[#FAF7F2] border border-[#D5CCC0] rounded-2xl p-6 space-y-3 relative overflow-hidden group hover:border-[#1c1917] transition-all">
-                <div className="w-10 h-10 rounded-xl bg-[#1c1917] text-white flex items-center justify-center font-bold">
-                  <Users className="w-5 h-5" />
+              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-3 hover:-translate-y-1 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-[#1c1917] text-white flex items-center justify-center font-bold">
+                  <Users className="w-6 h-6" />
                 </div>
-                <h4 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  STUDENT ID INVITES
-                </h4>
+                <h4 className="font-display text-2xl text-[#1c1917]">PEER INVITES</h4>
                 <p className="text-xs text-stone-600 font-medium leading-relaxed">
                   Add peers to your team directly by their registered Student ID or university email, or distribute an 8-character group code.
                 </p>
               </div>
 
-              {/* Pillar 3 */}
-              <div className="bg-[#FAF7F2] border border-[#D5CCC0] rounded-2xl p-6 space-y-3 relative overflow-hidden group hover:border-[#1c1917] transition-all">
-                <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold">
-                  <Database className="w-5 h-5" />
+              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-3 hover:-translate-y-1 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center font-bold">
+                  <Database className="w-6 h-6" />
                 </div>
-                <h4 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  CLOUD DB PERSISTENCE
-                </h4>
+                <h4 className="font-display text-2xl text-[#1c1917]">CLOUD PERSISTENCE</h4>
                 <p className="text-xs text-stone-600 font-medium leading-relaxed">
                   Connected to Neon Cloud PostgreSQL with automatic schema verification and local disk backup. Zero lost submissions or courses.
                 </p>
               </div>
 
-              {/* Pillar 4 */}
-              <div className="bg-[#FAF7F2] border border-[#D5CCC0] rounded-2xl p-6 space-y-3 relative overflow-hidden group hover:border-[#1c1917] transition-all">
-                <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold">
-                  <Award className="w-5 h-5" />
+              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-3 hover:-translate-y-1 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold">
+                  <Award className="w-6 h-6" />
                 </div>
-                <h4 className="font-display text-2xl text-[#1c1917] tracking-wide">
-                  BADGES &amp; PROGRESS
-                </h4>
+                <h4 className="font-display text-2xl text-[#1c1917]">REAL-TIME BADGES</h4>
                 <p className="text-xs text-stone-600 font-medium leading-relaxed">
                   Visual progress bars, submission timestamp badges, and group analytics keep everyone aligned before deadlines expire.
                 </p>
@@ -617,77 +776,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 4: ROLE SHOWCASE (Like the bottle lineup "YEAR ROUND" in the video) */}
-        <section id="roles" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5]">
-          <div className="max-w-6xl mx-auto space-y-10">
-            
-            <div className="text-center space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-[#E11D48]">
-                MULTI-ROLE ARCHITECTURE
-              </span>
-              <h2 className="font-display text-4xl sm:text-6xl text-[#1c1917] tracking-tight">
-                BUILT FOR EVERY STAKEHOLDER
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 max-w-xl mx-auto font-medium">
-                Whether you are a student group leader or a professor managing hundreds of students, JoinEazy adapts to your workflow.
-              </p>
-            </div>
-
-            {/* Role Cards Lineup */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              
-              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 space-y-4 shadow-[4px_4px_0px_0px_#1c1917]">
-                <div className="text-[11px] font-mono font-bold text-[#E11D48] uppercase">ROLE 01</div>
-                <h3 className="font-display text-2xl text-[#1c1917]">GROUP LEADER</h3>
-                <ul className="text-xs text-stone-600 space-y-2 font-medium">
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Create group under subject</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Invite peers via ID/Email</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Submit 2-step verification</li>
-                </ul>
-              </div>
-
-              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 space-y-4 shadow-[4px_4px_0px_0px_#1c1917]">
-                <div className="text-[11px] font-mono font-bold text-[#E11D48] uppercase">ROLE 02</div>
-                <h3 className="font-display text-2xl text-[#1c1917]">TEAM MEMBER</h3>
-                <ul className="text-xs text-stone-600 space-y-2 font-medium">
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Join via 8-char code</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Access OneDrive directory</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Confirm own participation</li>
-                </ul>
-              </div>
-
-              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 space-y-4 shadow-[4px_4px_0px_0px_#1c1917]">
-                <div className="text-[11px] font-mono font-bold text-[#E11D48] uppercase">ROLE 03</div>
-                <h3 className="font-display text-2xl text-[#1c1917]">PROFESSOR</h3>
-                <ul className="text-xs text-stone-600 space-y-2 font-medium">
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Create subjects &amp; links</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Target all or specific groups</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Audit submissions &amp; notes</li>
-                </ul>
-              </div>
-
-              <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 space-y-4 shadow-[4px_4px_0px_0px_#1c1917]">
-                <div className="text-[11px] font-mono font-bold text-[#E11D48] uppercase">ROLE 04</div>
-                <h3 className="font-display text-2xl text-[#1c1917]">ADMIN ANALYTICS</h3>
-                <ul className="text-xs text-stone-600 space-y-2 font-medium">
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Cohort completion rates</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Group-wise breakdowns</li>
-                  <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Overdue alerts &amp; tracking</li>
-                </ul>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
-
-        {/* SECTION 5: FAQ ACCORDION */}
-        <section id="faq" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] bg-[#F5F0E8]/50">
+        {/* SECTION 4: FAQ ACCORDION */}
+        <section id="faq" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] bg-[#F5F0E8]/40">
           <div className="max-w-4xl mx-auto space-y-8">
             
             <div className="text-center space-y-2">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-[#E11D48]">
-                QUESTIONS &amp; ANSWERS
+                NEED TO KNOW
               </span>
               <h2 className="font-display text-4xl sm:text-5xl text-[#1c1917] tracking-tight">
                 FREQUENTLY ASKED QUESTIONS
@@ -728,20 +823,19 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 6: DIRECT CONTACT BANNER & FOOTER */}
+        {/* SECTION 5: DIRECT CONTACT BANNER & FOOTER */}
         <footer className="p-8 sm:p-16 bg-[#1c1917] text-[#FAF7F2] space-y-12">
           
-          {/* Direct Support Card in Footer */}
-          <div className="max-w-4xl mx-auto bg-gradient-to-r from-stone-900 to-stone-800 border border-stone-700 p-8 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl">
+          <div className="max-w-4xl mx-auto bg-gradient-to-r from-stone-900 to-stone-800 border-2 border-stone-700 p-8 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl">
             <div className="space-y-1 text-center sm:text-left">
               <span className="text-xs font-mono font-bold text-[#E11D48] uppercase tracking-wider">
-                NEED DIRECT ASSISTANCE?
+                DIRECT HELP DESK &bull; 24/7 SUPPORT
               </span>
               <h3 className="font-display text-2xl sm:text-3xl tracking-wide">
                 SEND A MESSAGE DIRECTLY
               </h3>
               <p className="text-xs text-stone-400">
-                Messages route directly to <span className="text-white font-bold font-mono">priyansh191882@gmail.com</span>
+                Inquiries dispatched directly to <span className="text-white font-bold font-mono">priyansh191882@gmail.com</span>
               </p>
             </div>
 
@@ -753,14 +847,13 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Footer Bottom Links */}
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-stone-800 text-xs text-stone-400">
             <div className="flex items-center gap-3">
               <span className="font-display text-xl text-[#FAF7F2] tracking-wider">JOINEAZY</span>
-              <span>&bull; Full Stack Technical Task Assignment</span>
+              <span>&bull; Academic Student &amp; Group Management Platform</span>
             </div>
             <div>
-              &copy; 2026 JoinEazy Platform. Built for University Excellence.
+              &copy; 2026 JoinEazy. Connected to Neon Cloud PostgreSQL.
             </div>
           </div>
 
@@ -768,7 +861,7 @@ export default function LandingPage() {
 
       </div>
 
-      {/* FLOATING ACTION BUTTON IN BOTTOM RIGHT CORNER (Like in the video) */}
+      {/* FLOATING NEED HELP BUTTON */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsSupportOpen(true)}
@@ -779,7 +872,7 @@ export default function LandingPage() {
         </button>
       </div>
 
-      {/* SUPPORT MODAL (Configured to send to priyansh191882@gmail.com) */}
+      {/* SUPPORT MODAL (Sends to priyansh191882@gmail.com) */}
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
 
     </div>

@@ -16,7 +16,8 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  Award
+  Award,
+  BookOpen
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -46,42 +47,50 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center font-sans">
+        <div className="w-8 h-8 border-3 border-[#1c1917] border-t-[#E11D48] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      
+      {/* Header Banner */}
+      <div className="bg-[#1c1917] text-[#FAF7F2] border-2 border-[#1c1917] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_#E11D48] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 mb-2">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Professor / Admin Management Dashboard
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 text-stone-300 mb-3">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#E11D48]" />
+            Professor &amp; Admin Dashboard
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Assignment & Group Progress Analytics
+          <h1 className="font-display text-3xl sm:text-5xl tracking-wide text-white">
+            PROGRESS &amp; SUBMISSION ANALYTICS
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Monitor coursework completion, track student collaboration, and review OneDrive submission confirmations.
+          <p className="font-script text-xl text-stone-300 mt-1 max-w-xl">
+            Monitor coursework completion, track student collaboration, and review OneDrive confirmations.
           </p>
         </div>
 
-        <div className="flex gap-2.5">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/admin/courses"
+            className="px-4 py-2.5 bg-white/10 hover:bg-white text-white hover:text-[#1c1917] text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <BookOpen className="w-4 h-4" />
+            Manage Courses
+          </Link>
           <Link
             to="/admin/assignments"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-100 transition-colors"
+            className="px-5 py-2.5 bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Create Assignment
+            Post Assignment
           </Link>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs">
+        <div className="p-4 rounded-2xl bg-rose-50 border-2 border-[#E11D48] text-[#E11D48] text-xs font-bold">
           {error}
         </div>
       )}
@@ -118,22 +127,22 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Overall Completion Rate Card with Visual Chart & Gauge */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      {/* Overall Completion Rate Card */}
+      <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 sm:p-7 shadow-[5px_5px_0px_0px_#1c1917] space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b-2 border-[#1c1917] pb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              Cohort-wide Submission Completion Rate
+            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
+              COHORT METRICS
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl text-[#1c1917] tracking-tight">
+              COHORT-WIDE SUBMISSION COMPLETION RATE
             </h2>
-            <p className="text-xs text-slate-500">
-              Aggregated completion percentage across all assigned coursework and groups
-            </p>
           </div>
           <div className="text-right">
-            <span className="text-3xl font-black text-indigo-600">
+            <span className="font-display text-4xl text-[#E11D48]">
               {analytics?.overall_completion_rate || 0}%
             </span>
-            <span className="text-xs font-semibold text-slate-400 ml-1">Overall Rate</span>
+            <span className="text-xs font-bold uppercase text-stone-500 ml-1">Overall Rate</span>
           </div>
         </div>
 
@@ -144,20 +153,20 @@ export default function AdminDashboard() {
           showPercentage={false}
         />
 
-        <div className="grid grid-cols-3 gap-2 pt-2 text-center text-xs">
-          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-            <span className="text-slate-400 block text-[11px] font-semibold">Total Target Submissions</span>
-            <span className="text-lg font-extrabold text-slate-800">
+        <div className="grid grid-cols-3 gap-2 pt-2 text-center text-xs font-mono">
+          <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-stone-200">
+            <span className="text-stone-500 block text-[10px] uppercase font-bold">Total Target Submissions</span>
+            <span className="font-display text-2xl text-stone-900">
               {analytics?.assignment_breakdown?.reduce((acc, curr) => acc + curr.total_target, 0) || 0}
             </span>
           </div>
-          <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-100">
-            <span className="text-emerald-700 block text-[11px] font-semibold">Submitted & Confirmed</span>
-            <span className="text-lg font-extrabold text-emerald-800">{analytics?.total_submissions || 0}</span>
+          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+            <span className="text-emerald-700 block text-[10px] uppercase font-bold">Confirmed</span>
+            <span className="font-display text-2xl text-emerald-800">{analytics?.total_submissions || 0}</span>
           </div>
-          <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-100">
-            <span className="text-amber-700 block text-[11px] font-semibold">Pending Submissions</span>
-            <span className="text-lg font-extrabold text-amber-800">
+          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200">
+            <span className="text-amber-700 block text-[10px] uppercase font-bold">Pending</span>
+            <span className="font-display text-2xl text-amber-800">
               {analytics?.assignment_breakdown?.reduce((acc, curr) => acc + curr.pending_count, 0) || 0}
             </span>
           </div>
@@ -166,31 +175,32 @@ export default function AdminDashboard() {
 
       {/* Two Column Layout: Group Performance + Assignment Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
         {/* Group Performance Table */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-          <div className="flex justify-between items-center">
+        <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-4">
+          <div className="flex justify-between items-center border-b-2 border-[#1c1917] pb-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight">Group Performance</h3>
-              <p className="text-xs text-slate-500">Track progress by collaborative team</p>
+              <h3 className="font-display text-2xl text-[#1c1917]">GROUP PERFORMANCE</h3>
+              <p className="text-xs text-stone-500">Track progress by collaborative team</p>
             </div>
             <Link
               to="/admin/groups"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-bold uppercase tracking-wider text-[#E11D48] hover:underline flex items-center gap-1"
             >
               All Groups <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {analytics?.group_performance && analytics.group_performance.length > 0 ? (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-stone-200">
               {analytics.group_performance.map((grp) => (
                 <div key={grp.id} className="py-3.5 space-y-2">
                   <div className="flex justify-between items-center text-xs">
                     <div>
-                      <span className="font-bold text-slate-900">{grp.name}</span>
-                      <span className="text-slate-400 ml-2">({grp.member_count} members)</span>
+                      <span className="font-bold text-stone-900">{grp.name}</span>
+                      <span className="text-stone-400 ml-2">({grp.member_count} members)</span>
                     </div>
-                    <span className="font-extrabold text-indigo-600">
+                    <span className="font-mono font-bold text-[#E11D48]">
                       {grp.completed_count}/{grp.assigned_count} ({grp.completion_rate}%)
                     </span>
                   </div>
@@ -204,44 +214,44 @@ export default function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <div className="py-6 text-center text-xs text-slate-400">No student groups created yet.</div>
+            <div className="py-6 text-center text-xs text-stone-400">No student groups created yet.</div>
           )}
         </div>
 
         {/* Assignment Completion Breakdown */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-          <div className="flex justify-between items-center">
+        <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-4">
+          <div className="flex justify-between items-center border-b-2 border-[#1c1917] pb-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight">Assignment Submissions</h3>
-              <p className="text-xs text-slate-500">Monitor completion per assignment</p>
+              <h3 className="font-display text-2xl text-[#1c1917]">ASSIGNMENT SUBMISSIONS</h3>
+              <p className="text-xs text-stone-500">Monitor completion per assignment</p>
             </div>
             <Link
               to="/admin/assignments"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-bold uppercase tracking-wider text-[#E11D48] hover:underline flex items-center gap-1"
             >
               Manage <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {analytics?.assignment_breakdown && analytics.assignment_breakdown.length > 0 ? (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-stone-200">
               {analytics.assignment_breakdown.map((assign) => (
                 <div key={assign.id} className="py-3.5 space-y-2">
                   <div className="flex justify-between items-start gap-2 text-xs">
                     <div>
                       <Link
                         to={`/admin/assignments/${assign.id}/submissions`}
-                        className="font-bold text-slate-900 hover:text-indigo-600 transition-colors"
+                        className="font-bold text-stone-900 hover:text-[#E11D48] transition-colors"
                       >
                         {assign.title}
                       </Link>
-                      <div className="text-[11px] text-slate-400 mt-0.5">
+                      <div className="text-[11px] text-stone-400 mt-0.5 font-medium">
                         Due: {new Date(assign.due_date).toLocaleDateString()}
                       </div>
                     </div>
                     <Link
                       to={`/admin/assignments/${assign.id}/submissions`}
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center gap-1 flex-shrink-0"
+                      className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-[#1c1917] hover:text-white text-stone-700 text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors"
                     >
                       {assign.submitted_count}/{assign.total_target} Submissions
                       <ChevronRight className="w-3 h-3" />
@@ -257,26 +267,27 @@ export default function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <div className="py-6 text-center text-xs text-slate-400">No assignments created yet.</div>
+            <div className="py-6 text-center text-xs text-stone-400">No assignments created yet.</div>
           )}
         </div>
+
       </div>
 
       {/* Recent Submissions Feed */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-slate-900 tracking-tight">Recent Submissions Activity</h3>
+      <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 shadow-[5px_5px_0px_0px_#1c1917] space-y-4">
+        <h3 className="font-display text-2xl text-[#1c1917]">RECENT SUBMISSIONS ACTIVITY</h3>
         {analytics?.recent_activity && analytics.recent_activity.length > 0 ? (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-stone-200">
             {analytics.recent_activity.map((act) => (
-              <div key={act.id} className="py-3 flex items-center justify-between gap-4 text-xs">
+              <div key={act.id} className="py-3 flex items-center justify-between gap-4 text-xs font-medium">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900">{act.group_name}</span> confirmed submission for{' '}
-                    <span className="font-semibold text-indigo-700">{act.assignment_title}</span>
-                    <div className="text-[11px] text-slate-400">
+                    <span className="font-bold text-stone-900">{act.group_name}</span> confirmed submission for{' '}
+                    <span className="font-semibold text-[#E11D48]">{act.assignment_title}</span>
+                    <div className="text-[11px] text-stone-400">
                       Confirmed by {act.student_name} on {new Date(act.submitted_at).toLocaleString()}
                     </div>
                   </div>
@@ -287,9 +298,10 @@ export default function AdminDashboard() {
             ))}
           </div>
         ) : (
-          <div className="py-6 text-center text-xs text-slate-400">No submissions recorded yet.</div>
+          <div className="py-6 text-center text-xs text-stone-400 font-medium">No submissions recorded yet.</div>
         )}
       </div>
+
     </div>
   );
 }

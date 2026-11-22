@@ -17,6 +17,64 @@
   .border-paper {
     border-color: #E6DFD5;
   }
+  .editorial-shadow {
+    box-shadow: 5px 5px 0px 0px #1c1917;
+  }
+  .editorial-shadow-sm {
+    box-shadow: 3px 3px 0px 0px #1c1917;
+  }
+  .editorial-shadow-hover {
+    transition: all 0.2s ease;
+  }
+  .editorial-shadow-hover:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px 0px #1c1917;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-marquee {
+  display: flex;
+  width: 200%;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
 body {
