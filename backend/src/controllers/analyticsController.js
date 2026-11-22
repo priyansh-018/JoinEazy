@@ -163,13 +163,14 @@ const getStudentProgress = async (req, res, next) => {
     }
 
     // Get assignments for student's groups
+    const placeholders = groupIds.map((_, i) => `$${i + 1}`).join(', ');
     const assignmentsRes = await db.query(
       `SELECT DISTINCT a.*
        FROM assignments a
        LEFT JOIN assignment_groups ag ON a.id = ag.assignment_id
-       WHERE a.target_type = 'all' OR ag.group_id = ANY($1)
+       WHERE a.target_type = 'all' OR ag.group_id IN (${placeholders})
        ORDER BY a.due_date ASC`,
-      [groupIds]
+      [...groupIds]
     );
 
     const assignments = assignmentsRes.rows;
@@ -179,12 +180,13 @@ const getStudentProgress = async (req, res, next) => {
 
     const enrichedAssignments = await Promise.all(
       assignments.map(async (a) => {
+        const subPlaceholders = groupIds.map((_, i) => `$${i + 2}`).join(', ');
         const subRes = await db.query(
           `SELECT s.*, g.name as group_name
            FROM submissions s
            JOIN groups g ON s.group_id = g.id
-           WHERE s.assignment_id = $1 AND s.group_id = ANY($2)`,
-          [a.id, groupIds]
+           WHERE s.assignment_id = $1 AND s.group_id IN (${subPlaceholders})`,
+          [a.id, ...groupIds]
         );
 
         const hasSubmitted = subRes.rows.length > 0;

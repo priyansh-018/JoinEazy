@@ -175,8 +175,9 @@ const getAllAssignments = async (req, res, next) => {
     const params = [];
 
     if (groupIds.length > 0) {
-      assignmentsQuery += ` OR ag.group_id = ANY($1)`;
-      params.push(groupIds);
+      const placeholders = groupIds.map((_, i) => `$${i + 1}`).join(', ');
+      assignmentsQuery += ` OR ag.group_id IN (${placeholders})`;
+      params.push(...groupIds);
     }
     assignmentsQuery += ` ORDER BY a.due_date ASC`;
 
@@ -190,13 +191,14 @@ const getAllAssignments = async (req, res, next) => {
         let myConfirmations = [];
 
         if (groupIds.length > 0) {
+          const subPlaceholders = groupIds.map((_, i) => `$${i + 2}`).join(', ');
           const subRes = await db.query(
             `SELECT s.*, g.name as group_name, u.name as submitted_by_name
              FROM submissions s
              JOIN groups g ON s.group_id = g.id
              JOIN users u ON s.submitted_by = u.id
-             WHERE s.assignment_id = $1 AND s.group_id = ANY($2)`,
-            [assign.id, groupIds]
+             WHERE s.assignment_id = $1 AND s.group_id IN (${subPlaceholders})`,
+            [assign.id, ...groupIds]
           );
 
           if (subRes.rows.length > 0) {
