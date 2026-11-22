@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import SupportModal from '../components/SupportModal';
+import { useSupport } from '../context/SupportContext';
 import {
   GraduationCap,
   Users,
@@ -42,7 +42,7 @@ export default function LandingPage() {
   // Scroll tracking for animations & parallax
   const [scrollY, setScrollY] = useState(0);
   const [activeFaq, setActiveFaq] = useState(null);
-  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const { openSupport } = useSupport();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Hero interactive console tab: 'submission' | 'professor' | 'progress'
@@ -144,7 +144,7 @@ export default function LandingPage() {
           </a>
 
           <button
-            onClick={() => setIsSupportOpen(true)}
+            onClick={openSupport}
             className="w-10 h-10 rounded-full border border-transparent hover:border-[#1c1917] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all cursor-pointer"
             title="Direct Support Inbox"
           >
@@ -230,7 +230,7 @@ export default function LandingPage() {
               <button
                 onClick={() => {
                   setIsMenuOpen(false);
-                  setIsSupportOpen(true);
+                  openSupport();
                 }}
                 className="w-full py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-[#FAF7F2] text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-sm"
               >
@@ -840,7 +840,7 @@ export default function LandingPage() {
             </div>
 
             <button
-              onClick={() => setIsSupportOpen(true)}
+              onClick={openSupport}
               className="px-6 py-3 bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md shrink-0 cursor-pointer"
             >
               Contact Support
@@ -860,20 +860,6 @@ export default function LandingPage() {
         </footer>
 
       </div>
-
-      {/* FLOATING NEED HELP BUTTON */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => setIsSupportOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-sm tracking-wider shadow-2xl transition-all transform hover:scale-105 border-2 border-white/20 cursor-pointer"
-        >
-          <HelpCircle className="w-4 h-4 text-emerald-400" />
-          <span>NEED HELP?</span>
-        </button>
-      </div>
-
-      {/* SUPPORT MODAL (Sends to priyansh191882@gmail.com) */}
-      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
 
     </div>
   );

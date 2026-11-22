@@ -27,6 +27,7 @@ export default function AdminSubmissionsPage() {
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
+      setError('');
       const res = await api.get(`/submissions/assignment/${assignment_id}`);
       if (res.data.success) {
         setData(res.data);
@@ -57,8 +58,8 @@ export default function AdminSubmissionsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center font-sans">
+        <div className="w-8 h-8 border-3 border-[#1c1917] border-t-[#E11D48] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -71,12 +72,13 @@ export default function AdminSubmissionsPage() {
   const completionRate = totalGroups > 0 ? Math.round((submittedGroups / totalGroups) * 100) : 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      
       {/* Back button & Breadcrumb */}
       <div>
         <Link
           to="/admin/assignments"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-[#1c1917] transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
           Back to Assignments
@@ -84,17 +86,17 @@ export default function AdminSubmissionsPage() {
       </div>
 
       {/* Assignment Header Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm space-y-4">
+      <div className="bg-[#1c1917] text-[#FAF7F2] border-2 border-[#1c1917] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_#E11D48] space-y-6">
         <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Submission Tracking & Verification
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 text-stone-300">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#E11D48]" />
+              Submission Tracking &amp; Verification
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="font-display text-3xl sm:text-4xl text-white tracking-wide uppercase">
               {assignment?.title}
             </h1>
-            <p className="text-xs text-slate-500 max-w-3xl leading-relaxed">
+            <p className="text-xs text-stone-300 max-w-3xl leading-relaxed font-medium">
               {assignment?.description}
             </p>
           </div>
@@ -104,48 +106,48 @@ export default function AdminSubmissionsPage() {
               href={assignment?.onedrive_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-stone-200 text-[#1c1917] text-xs font-bold uppercase tracking-wider shadow-md transition-colors"
             >
-              <FolderOpen className="w-4 h-4" />
+              <FolderOpen className="w-4 h-4 text-[#E11D48]" />
               Open OneDrive Folder
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3.5 h-3.5 ml-1" />
             </a>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs font-mono text-stone-300">
               Due: {new Date(assignment?.due_date).toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Aggregate Progress */}
-        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-          <div className="text-xs font-bold text-slate-700">
-            Overall Group Submissions: {submittedGroups} of {totalGroups} ({completionRate}%)
+        <div className="pt-4 border-t-2 border-stone-800 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div className="text-xs font-bold uppercase tracking-wider text-stone-300">
+            Overall Group Submissions: <span className="text-white font-mono font-bold">{submittedGroups} of {totalGroups} ({completionRate}%)</span>
           </div>
-          <div className="w-full sm:w-64">
-            <ProgressBar value={completionRate} size="sm" color="emerald" showPercentage={false} />
+          <div className="w-full sm:w-72">
+            <ProgressBar value={completionRate} size="md" color="emerald" showPercentage={false} />
           </div>
         </div>
       </div>
 
       {/* Notifications */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex justify-between items-center">
+        <div className="p-4 rounded-2xl bg-rose-50 border-2 border-[#E11D48] text-[#E11D48] text-xs font-bold flex justify-between items-center shadow-xs">
           <span>{error}</span>
-          <button onClick={() => setError('')} className="font-bold ml-2">Dismiss</button>
+          <button onClick={() => setError('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
         </div>
       )}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex justify-between items-center">
+        <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 text-emerald-800 text-xs font-bold flex justify-between items-center shadow-xs">
           <span>{successMsg}</span>
-          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2">Dismiss</button>
+          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
         </div>
       )}
 
       {/* Group-wise & Student-wise Breakdown List */}
       <div className="space-y-6">
-        <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <Users className="w-5 h-5 text-indigo-600" />
-          Group-Wise & Student-Wise Confirmation Roster
+        <h2 className="font-display text-2xl text-[#1c1917] tracking-tight flex items-center gap-2">
+          <Users className="w-6 h-6 text-[#E11D48]" />
+          GROUP-WISE &amp; STUDENT-WISE CONFIRMATION ROSTER
         </h2>
 
         {submissions.length > 0 ? (
@@ -153,13 +155,13 @@ export default function AdminSubmissionsPage() {
             {submissions.map((item) => (
               <div
                 key={item.group_id}
-                className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden"
+                className="bg-white rounded-3xl border-2 border-[#1c1917] shadow-[5px_5px_0px_0px_#1c1917] overflow-hidden space-y-0"
               >
                 {/* Group Summary Header */}
-                <div className="p-6 bg-slate-50/70 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="p-6 bg-[#FAF7F2] border-b-2 border-[#1c1917] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-base font-bold text-slate-900">{item.group_name}</h3>
+                      <h3 className="font-display text-2xl text-[#1c1917]">{item.group_name}</h3>
                       {item.has_submitted ? (
                         <Badge
                           variant={item.submission_details?.status === 'verified' ? 'verified' : 'submitted'}
@@ -170,11 +172,11 @@ export default function AdminSubmissionsPage() {
                       )}
                     </div>
                     {item.has_submitted && (
-                      <div className="text-xs text-slate-500 mt-1">
-                        Submitted by <strong className="text-slate-800">{item.submission_details?.submitted_by_name}</strong> on{' '}
+                      <div className="text-xs text-stone-600 mt-1 font-medium">
+                        Submitted by <strong className="text-stone-900">{item.submission_details?.submitted_by_name}</strong> on{' '}
                         {new Date(item.submission_details?.submitted_at).toLocaleString()}
                         {item.submission_details?.notes && (
-                          <div className="mt-1 p-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-[11px]">
+                          <div className="mt-2 p-3 rounded-xl bg-white border-2 border-[#1c1917] text-stone-800 font-mono text-[11px]">
                             Notes: "{item.submission_details?.notes}"
                           </div>
                         )}
@@ -185,10 +187,10 @@ export default function AdminSubmissionsPage() {
                   {/* Actions & Verification */}
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <div className="text-xs font-bold text-slate-700">
+                      <div className="text-xs font-bold uppercase tracking-wider text-stone-800">
                         {item.confirmed_members_count} of {item.total_members} Students Confirmed
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] font-bold text-stone-500">
                         {item.confirmation_percentage}% Student Participation
                       </div>
                     </div>
@@ -198,16 +200,16 @@ export default function AdminSubmissionsPage() {
                         {item.submission_details?.status === 'verified' ? (
                           <button
                             onClick={() => handleVerifySubmission(item.submission_details.id, 'submitted')}
-                            className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-semibold"
+                            className="px-3 py-2 rounded-xl border-2 border-[#1c1917] hover:bg-stone-100 text-stone-700 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                           >
                             Unmark Verified
                           </button>
                         ) : (
                           <button
                             onClick={() => handleVerifySubmission(item.submission_details.id, 'verified')}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-colors"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-xs uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
                           >
-                            <ShieldCheck className="w-4 h-4" />
+                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
                             Mark as Verified
                           </button>
                         )}
@@ -218,32 +220,32 @@ export default function AdminSubmissionsPage() {
 
                 {/* Individual Student Confirmations Table */}
                 <div className="p-6">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  <div className="text-xs font-bold uppercase tracking-wider text-stone-600 mb-3">
                     Student-wise Confirmation Details:
                   </div>
 
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-100 text-xs">
+                    <table className="min-w-full divide-y-2 divide-stone-200 text-xs">
                       <thead>
-                        <tr className="text-left font-bold text-slate-500">
+                        <tr className="text-left font-display uppercase tracking-wider text-stone-800">
                           <th className="pb-3 pl-2">Student Name</th>
                           <th className="pb-3">Student ID</th>
                           <th className="pb-3">Role in Group</th>
                           <th className="pb-3 text-center">Step 1 Verification</th>
-                          <th className="pb-3 text-center">Step 2 Final Confirmation</th>
+                          <th className="pb-3 text-center">Step 2 Confirmation</th>
                           <th className="pb-3 text-right pr-2">Confirmation Timestamp</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-stone-100">
                         {item.members.map((member) => (
-                          <tr key={member.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-2.5 pl-2 font-bold text-slate-900 flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-700 text-[10px]">
+                          <tr key={member.id} className="hover:bg-stone-50 transition-colors">
+                            <td className="py-2.5 pl-2 font-bold text-stone-900 flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-lg bg-[#1c1917] text-white flex items-center justify-center font-display text-[10px]">
                                 {member.name.charAt(0)}
                               </div>
                               {member.name}
                             </td>
-                            <td className="py-2.5 text-slate-500 font-mono">
+                            <td className="py-2.5 text-stone-600 font-mono font-bold">
                               {member.student_id || 'N/A'}
                             </td>
                             <td className="py-2.5">
@@ -252,32 +254,32 @@ export default function AdminSubmissionsPage() {
                                   <Crown className="w-3 h-3 text-amber-500" /> Leader
                                 </span>
                               ) : (
-                                <span className="text-slate-500 text-[11px]">Member</span>
+                                <span className="text-stone-500 text-[11px] font-medium">Member</span>
                               )}
                             </td>
                             <td className="py-2.5 text-center">
                               {member.has_confirmed ? (
-                                <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
-                                  <Check className="w-4 h-4" /> "Yes, Submitted"
+                                <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                                  <Check className="w-4 h-4 text-emerald-600" /> "Yes, Submitted"
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-slate-300">
+                                <span className="inline-flex items-center gap-1 text-stone-400">
                                   <X className="w-3.5 h-3.5" /> Unconfirmed
                                 </span>
                               )}
                             </td>
                             <td className="py-2.5 text-center">
                               {member.has_confirmed ? (
-                                <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
-                                  <Check className="w-4 h-4" /> Confirmed
+                                <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                                  <Check className="w-4 h-4 text-emerald-600" /> Confirmed
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-slate-300">
+                                <span className="inline-flex items-center gap-1 text-stone-400">
                                   <X className="w-3.5 h-3.5" /> Unconfirmed
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 text-right pr-2 text-slate-500">
+                            <td className="py-2.5 text-right pr-2 text-stone-500 font-mono">
                               {member.confirmed_at
                                 ? new Date(member.confirmed_at).toLocaleString(undefined, {
                                     month: 'short',
@@ -297,7 +299,7 @@ export default function AdminSubmissionsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-3xl p-8 text-center text-xs text-slate-500 border border-slate-200">
+          <div className="bg-white rounded-3xl p-8 text-center text-xs text-stone-600 font-medium border-2 border-dashed border-[#1c1917] max-w-lg mx-auto shadow-xs">
             No groups eligible for this assignment.
           </div>
         )}

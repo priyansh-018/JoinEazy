@@ -52,7 +52,6 @@ Sent via JoinEazy Academic Management Platform`;
     setError('');
 
     try {
-      // 1. Send to backend endpoint for persistence & SMTP dispatch
       await api.post('/support/contact', {
         name,
         email,
@@ -61,7 +60,6 @@ Sent via JoinEazy Academic Management Platform`;
         recipient: TARGET_EMAIL
       });
 
-      // 2. Open default mail client or Gmail web link
       try {
         window.open(mailtoUrl, '_blank');
       } catch (err) {
@@ -71,7 +69,6 @@ Sent via JoinEazy Academic Management Platform`;
       setSent(true);
     } catch (err) {
       console.warn('Backend contact route notification:', err);
-      // Even if backend fails, trigger mailto directly so user is never blocked
       window.open(mailtoUrl, '_blank');
       setSent(true);
     } finally {
@@ -95,39 +92,42 @@ Sent via JoinEazy Academic Management Platform`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
+      <div className="bg-white rounded-3xl max-w-lg w-full shadow-[8px_8px_0px_0px_#1c1917] border-2 border-[#1c1917] overflow-hidden transform transition-all animate-in fade-in zoom-in duration-200">
+        
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 text-white flex justify-between items-start">
+        <div className="p-6 bg-[#1c1917] text-[#FAF7F2] flex justify-between items-start border-b-2 border-[#1c1917]">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white mb-2">
-              <HelpCircle className="w-3.5 h-3.5" />
-              JoinEazy Support & Help Desk
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-stone-300 mb-2">
+              <HelpCircle className="w-3.5 h-3.5 text-[#E11D48]" />
+              JOINEAZY HELP DESK &bull; DIRECT ASSISTANCE
             </div>
-            <h3 className="text-xl font-bold tracking-tight">How can we help you?</h3>
-            <p className="text-indigo-100 text-xs mt-1">
-              Have questions about student groups, OneDrive submissions, or course links?
+            <h3 className="font-display text-2xl sm:text-3xl tracking-wide text-white">
+              HOW CAN WE ASSIST YOU?
+            </h3>
+            <p className="font-script text-lg text-stone-300 mt-0.5">
+              Coursework questions, group invites, or submission support
             </p>
           </div>
           <button
             onClick={resetAndClose}
-            className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+            className="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Target Email Banner */}
-        <div className="px-6 py-2.5 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-indigo-900 font-semibold truncate">
-            <Inbox className="w-4 h-4 text-indigo-600 shrink-0" />
-            <span className="text-slate-600 font-normal">Direct Support Inbox:</span>
-            <span className="font-mono font-bold text-indigo-700 truncate">{TARGET_EMAIL}</span>
+        <div className="px-6 py-3 bg-[#FAF7F2] border-b-2 border-[#1c1917] flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 font-semibold truncate">
+            <Inbox className="w-4 h-4 text-[#E11D48] shrink-0" />
+            <span className="text-stone-600 font-bold uppercase text-[10px] tracking-wider">Direct Inbox:</span>
+            <span className="font-mono font-bold text-stone-900 truncate">{TARGET_EMAIL}</span>
           </div>
           <button
             onClick={handleCopyEmail}
             type="button"
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-[11px] font-bold transition-all shrink-0 ml-2 shadow-xs"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-[#1c1917] text-stone-900 hover:bg-[#1c1917] hover:text-white text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 ml-2 shadow-xs cursor-pointer"
             title="Copy recipient email"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -137,19 +137,19 @@ Sent via JoinEazy Academic Management Platform`;
 
         {sent ? (
           <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-600 shadow-sm">
               <CheckCircle2 className="w-9 h-9" />
             </div>
             <div>
-              <h4 className="text-xl font-extrabold text-slate-900">Message Dispatched!</h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Your inquiry has been processed and routed to <span className="font-bold text-indigo-600">{TARGET_EMAIL}</span>. We will review your query and reply to <span className="font-semibold text-slate-700">{email}</span> shortly.
+              <h4 className="font-display text-3xl text-[#1c1917]">MESSAGE DISPATCHED!</h4>
+              <p className="text-xs text-stone-600 mt-1 max-w-md mx-auto font-medium">
+                Your inquiry has been processed and routed to <span className="font-bold text-[#E11D48]">{TARGET_EMAIL}</span>. We will review your query and reply to <span className="font-semibold text-stone-900">{email}</span> shortly.
               </p>
             </div>
 
             {/* Quick Email Launcher Options */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 text-left">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
+            <div className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-[#1c1917] space-y-2.5 text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 block">
                 Direct Email Launchers:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -157,20 +157,20 @@ Sent via JoinEazy Academic Management Platform`;
                   href={gmailWebUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-600 text-xs font-bold transition-all shadow-xs"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white border-2 border-[#1c1917] hover:bg-[#1c1917] hover:text-white text-stone-900 text-xs font-bold uppercase tracking-wider transition-all shadow-xs"
                 >
-                  <Mail className="w-3.5 h-3.5 text-red-500" />
+                  <Mail className="w-3.5 h-3.5 text-rose-500" />
                   Open in Gmail Web
-                  <ExternalLink className="w-3 h-3 ml-auto text-slate-400" />
+                  <ExternalLink className="w-3 h-3 ml-auto text-stone-400" />
                 </a>
 
                 <a
                   href={mailtoUrl}
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-600 text-xs font-bold transition-all shadow-xs"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white border-2 border-[#1c1917] hover:bg-[#1c1917] hover:text-white text-stone-900 text-xs font-bold uppercase tracking-wider transition-all shadow-xs"
                 >
-                  <Inbox className="w-3.5 h-3.5 text-indigo-600" />
-                  Open Default Mail App
-                  <ExternalLink className="w-3 h-3 ml-auto text-slate-400" />
+                  <Inbox className="w-3.5 h-3.5 text-stone-700" />
+                  Default Mail App
+                  <ExternalLink className="w-3 h-3 ml-auto text-stone-400" />
                 </a>
               </div>
             </div>
@@ -179,43 +179,25 @@ Sent via JoinEazy Academic Management Platform`;
               <button
                 type="button"
                 onClick={resetAndClose}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-100 transition-all"
+                className="px-6 py-3 bg-[#1c1917] hover:bg-[#E11D48] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer font-display"
               >
-                Done
+                CLOSE WINDOW
               </button>
             </div>
           </div>
         ) : (
           <div className="p-6 space-y-5">
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+              <div className="p-3 rounded-xl bg-rose-50 border-2 border-[#E11D48] text-[#E11D48] text-xs font-bold">
                 {error}
               </div>
             )}
 
-            {/* Quick Tips */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-100">
-                <FileQuestion className="w-4 h-4 text-indigo-600 mb-1.5" />
-                <div className="text-xs font-bold text-indigo-950">2-Step Verification</div>
-                <div className="text-[11px] text-slate-500 mt-0.5">
-                  Confirm OneDrive upload before submitting coursework.
-                </div>
-              </div>
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                <Sparkles className="w-4 h-4 text-indigo-600 mb-1.5" />
-                <div className="text-xs font-bold text-slate-900">Course Invite Links</div>
-                <div className="text-[11px] text-slate-500 mt-0.5">
-                  Professors copy share links to group their students.
-                </div>
-              </div>
-            </div>
-
             {/* Support Ticket Form */}
-            <form onSubmit={handleSubmit} className="space-y-3.5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                     Your Name
                   </label>
                   <input
@@ -224,12 +206,12 @@ Sent via JoinEazy Academic Management Platform`;
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Alex Rivera"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Your Email Address
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
+                    Email Address
                   </label>
                   <input
                     type="email"
@@ -237,30 +219,30 @@ Sent via JoinEazy Academic Management Platform`;
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="alex@university.edu"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                   Topic / Issue Type
                 </label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E11D48] bg-white cursor-pointer"
                 >
                   <option value="General Inquiry">General Inquiry</option>
                   <option value="Group Creation or Join Code Issue">Group Creation or Join Code Issue</option>
                   <option value="Two-Step Verification Question">Two-Step Verification Question</option>
-                  <option value="Course Links & Professor Roster">Course Links & Professor Roster</option>
+                  <option value="Course Links & Professor Roster">Course Links &amp; Professor Roster</option>
                   <option value="Technical Bug Report">Technical Bug Report</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                   Your Message
                 </label>
                 <textarea
@@ -269,29 +251,29 @@ Sent via JoinEazy Academic Management Platform`;
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe your question or issue in detail..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <span className="text-[11px] text-slate-400">
-                  Sends directly to <span className="font-semibold text-slate-600">{TARGET_EMAIL}</span>
+              <div className="flex items-center justify-between pt-2 border-t-2 border-stone-200">
+                <span className="text-[11px] text-stone-500 font-medium">
+                  Routes to: <span className="font-bold text-stone-900">{TARGET_EMAIL}</span>
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={resetAndClose}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 rounded-xl hover:bg-stone-100 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-100 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] disabled:opacity-50 text-white font-display text-sm uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    {submitting ? 'Sending...' : 'Send Message'}
+                    {submitting ? 'SENDING...' : 'SEND MESSAGE'}
                   </button>
                 </div>
               </div>

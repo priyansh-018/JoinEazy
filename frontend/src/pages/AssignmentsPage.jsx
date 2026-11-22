@@ -13,7 +13,9 @@ import {
   FolderOpen,
   UserCheck,
   Search,
-  Users
+  Users,
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
 
 export default function AssignmentsPage() {
@@ -35,6 +37,7 @@ export default function AssignmentsPage() {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
+      setError('');
       const [assignRes, groupsRes] = await Promise.all([
         api.get('/assignments'),
         api.get('/groups/my')
@@ -99,28 +102,33 @@ export default function AssignmentsPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      
+      {/* Header Banner */}
+      <div className="bg-[#1c1917] text-[#FAF7F2] border-2 border-[#1c1917] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_#E11D48] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Assignments & Submissions
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 text-stone-300 mb-3">
+            <FileText className="w-3.5 h-3.5 text-[#E11D48]" />
+            Student Coursework &amp; Submissions
+          </div>
+          <h1 className="font-display text-3xl sm:text-5xl tracking-wide text-white">
+            ASSIGNMENTS &amp; SUBMISSIONS
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Access OneDrive links, review requirements, and verify submission status via 2-step verification.
+          <p className="font-script text-xl text-stone-300 mt-1 max-w-xl">
+            Access OneDrive folders, review project briefs, and execute two-step submission verification.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <div className="flex items-center gap-1.5 bg-[#FAF7F2] p-1.5 rounded-2xl border-2 border-white/20">
           {['all', 'pending', 'submitted', 'overdue'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg capitalize transition-all ${
+              className={`px-3 py-1.5 rounded-xl capitalize text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 filter === f
-                  ? 'bg-white text-indigo-700 shadow-sm font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#1c1917] text-white shadow-xs'
+                  : 'text-stone-700 hover:text-stone-900'
               }`}
             >
               {f}
@@ -131,48 +139,48 @@ export default function AssignmentsPage() {
 
       {/* Search Bar */}
       <div className="relative max-w-md">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
           <Search className="w-4 h-4" />
         </div>
         <input
           type="text"
-          placeholder="Search assignments by title or topic..."
+          placeholder="Search coursework by title or keywords..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-[#1c1917] bg-white text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
         />
       </div>
 
       {/* Notifications */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex justify-between items-center">
+        <div className="p-4 rounded-2xl bg-rose-50 border-2 border-[#E11D48] text-[#E11D48] text-xs font-bold flex justify-between items-center shadow-xs">
           <span>{error}</span>
-          <button onClick={() => setError('')} className="font-bold ml-2">Dismiss</button>
+          <button onClick={() => setError('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
         </div>
       )}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex justify-between items-center">
+        <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 text-emerald-800 text-xs font-bold flex justify-between items-center shadow-xs">
           <span>{successMsg}</span>
-          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2">Dismiss</button>
+          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
         </div>
       )}
 
       {/* Assignments List */}
       {loading ? (
         <div className="py-12 flex justify-center">
-          <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-3 border-[#1c1917] border-t-[#E11D48] rounded-full animate-spin"></div>
         </div>
       ) : filteredAssignments.length > 0 ? (
         <div className="space-y-4">
           {filteredAssignments.map((assign) => (
             <div
               key={assign.id}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow space-y-4"
+              className="bg-white rounded-3xl p-6 border-2 border-[#1c1917] shadow-[5px_5px_0px_0px_#1c1917] hover:shadow-[7px_7px_0px_0px_#1c1917] transition-all space-y-4"
             >
               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3">
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                    <h3 className="font-display text-2xl text-[#1c1917] tracking-tight">
                       {assign.title}
                     </h3>
                     {assign.submission_status === 'submitted' || assign.submission_status === 'verified' ? (
@@ -183,49 +191,49 @@ export default function AssignmentsPage() {
                       <Badge variant="pending" label="Pending Submission" />
                     )}
                     {assign.target_type === 'specific_groups' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-900 border-2 border-purple-800">
                         <Users className="w-3 h-3" /> Specific Groups
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed max-w-3xl">
+                  <p className="text-xs text-stone-600 leading-relaxed max-w-3xl font-medium">
                     {assign.description}
                   </p>
                 </div>
 
-                <div className="flex sm:flex-col items-end gap-1.5 flex-shrink-0 text-right">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <div className="flex sm:flex-col items-end gap-1 flex-shrink-0 text-right">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-700">
+                    <Calendar className="w-3.5 h-3.5 text-[#E11D48]" />
                     Due: {new Date(assign.due_date).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric'
                     })}
                   </div>
-                  <span className="text-[11px] text-slate-400">
-                    Prof. {assign.professor_name || 'Dr. Jenkins'}
+                  <span className="text-[11px] font-bold text-stone-500">
+                    Prof. {assign.professor_name || 'Faculty Member'}
                   </span>
                 </div>
               </div>
 
               {/* Action Ribbon & OneDrive Link */}
-              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+              <div className="pt-4 border-t-2 border-stone-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <div className="flex items-center gap-3">
                   <a
                     href={assign.onedrive_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FAF7F2] hover:bg-[#1c1917] hover:text-white text-[#1c1917] border-2 border-[#1c1917] text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
                   >
-                    <FolderOpen className="w-4 h-4 text-blue-600" />
+                    <FolderOpen className="w-4 h-4 text-[#E11D48]" />
                     Open OneDrive Folder
-                    <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+                    <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-70" />
                   </a>
 
                   {assign.submission && (
-                    <div className="text-[11px] text-slate-500 hidden sm:block">
+                    <div className="text-[11px] text-stone-600 hidden sm:block font-medium">
                       Submitted on {new Date(assign.submission.submitted_at).toLocaleDateString()} by{' '}
-                      <strong className="text-slate-700">{assign.submission.submitted_by_name}</strong>
+                      <strong className="text-stone-900">{assign.submission.submitted_by_name}</strong>
                     </div>
                   )}
                 </div>
@@ -235,16 +243,16 @@ export default function AssignmentsPage() {
                   {assign.submission_status === 'submitted' || assign.submission_status === 'verified' ? (
                     <div className="flex items-center gap-2">
                       {assign.my_confirmation ? (
-                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border-2 border-emerald-600 shadow-xs">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                           You Confirmed Submission
                         </div>
                       ) : (
                         <button
                           onClick={() => handlePeerConfirm(assign.submission.id)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#1c1917] hover:text-white border-2 border-[#1c1917] text-stone-900 text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer"
                         >
-                          <UserCheck className="w-4 h-4" />
+                          <UserCheck className="w-4 h-4 text-[#E11D48]" />
                           Confirm My Participation
                         </button>
                       )}
@@ -252,9 +260,9 @@ export default function AssignmentsPage() {
                   ) : (
                     <button
                       onClick={() => setActiveAssignmentForSubmission(assign)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-100 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-xs uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       Two-Step Submission Confirmation
                     </button>
                   )}
@@ -264,10 +272,10 @@ export default function AssignmentsPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-3xl p-10 text-center border border-dashed border-slate-300 max-w-lg mx-auto space-y-3">
-          <FileText className="w-10 h-10 text-slate-400 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No assignments match your filter</h3>
-          <p className="text-xs text-slate-500">
+        <div className="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-[#1c1917] max-w-lg mx-auto space-y-3 shadow-[4px_4px_0px_0px_#1c1917]">
+          <FileText className="w-10 h-10 text-stone-400 mx-auto" />
+          <h3 className="font-display text-2xl text-[#1c1917]">NO ASSIGNMENTS FOUND</h3>
+          <p className="text-xs text-stone-600 font-medium">
             Check your search terms or switch the filter to view all assignments.
           </p>
         </div>

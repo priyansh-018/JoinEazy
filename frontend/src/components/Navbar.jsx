@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSupport } from '../context/SupportContext';
 import {
   Users,
   FileText,
@@ -13,6 +14,7 @@ import {
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
+  const { openSupport } = useSupport();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,13 +25,13 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  // Don't render top navbar on Landing page (LandingPage has its own dedicated floating nav)
+  // Don't render top navbar on Landing page (LandingPage has its own dedicated editorial floating nav)
   if (location.pathname === '/') {
     return null;
   }
 
   return (
-    <nav className="bg-[#FAF7F2] border-b-2 border-[#1c1917] sticky top-0 z-40 backdrop-blur-md">
+    <nav className="bg-[#FAF7F2] border-b-2 border-[#1c1917] sticky top-0 z-40 backdrop-blur-md font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-18 py-2">
           
@@ -140,8 +142,17 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Right: User Profile & Actions */}
+          {/* Right: Support, User Profile & Actions */}
           <div className="flex items-center space-x-3">
+            <button
+              onClick={openSupport}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#1c1917] bg-[#FAF7F2] text-stone-800 text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer hover:bg-[#1c1917] hover:text-white"
+              title="Direct Support - priyansh191882@gmail.com"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-[#E11D48]" />
+              <span>Support</span>
+            </button>
+
             {user ? (
               <div className="flex items-center space-x-3">
                 <div className="text-right hidden sm:block">

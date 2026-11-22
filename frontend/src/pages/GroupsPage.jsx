@@ -14,7 +14,9 @@ import {
   Copy,
   AlertCircle,
   Sparkles,
-  Search
+  Search,
+  BookOpen,
+  X
 } from 'lucide-react';
 
 export default function GroupsPage() {
@@ -42,6 +44,7 @@ export default function GroupsPage() {
   const fetchMyGroups = async () => {
     try {
       setLoading(true);
+      setError('');
       const [groupsRes, coursesRes] = await Promise.all([
         api.get('/groups/my'),
         api.get('/courses/all')
@@ -51,10 +54,10 @@ export default function GroupsPage() {
         setGroups(groupsRes.data.groups);
       }
       if (coursesRes.data.success) {
-        setAvailableCourses(coursesRes.data.courses);
+        setAvailableCourses(coursesRes.data.courses || []);
       }
     } catch (err) {
-      setError('Failed to fetch your groups.');
+      setError(err.response?.data?.message || 'Failed to fetch your groups.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -144,29 +147,34 @@ export default function GroupsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      
+      {/* Page Header Banner */}
+      <div className="bg-[#1c1917] text-[#FAF7F2] border-2 border-[#1c1917] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_#E11D48] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Collaborative Student Groups
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 text-stone-300 mb-3">
+            <Users className="w-3.5 h-3.5 text-[#E11D48]" />
+            Student Team Collaboration
+          </div>
+          <h1 className="font-display text-3xl sm:text-5xl tracking-wide text-white">
+            COLLABORATIVE STUDENT GROUPS
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Form groups, invite peers via student email or ID, and complete team submissions together.
+          <p className="font-script text-xl text-stone-300 mt-1 max-w-xl">
+            Form groups under course subjects, invite peers via email or ID, and complete team submissions.
           </p>
         </div>
 
-        <div className="flex gap-2.5">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setShowJoinModal(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-xs transition-colors"
+            className="px-4 py-2.5 bg-white/10 hover:bg-white text-white hover:text-[#1c1917] text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-xs"
           >
-            <KeyRound className="w-4 h-4 text-slate-500" />
+            <KeyRound className="w-4 h-4" />
             Join with Code
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-100 transition-colors"
+            className="px-5 py-2.5 bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Create New Group
@@ -176,45 +184,45 @@ export default function GroupsPage() {
 
       {/* Notifications */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex justify-between items-center">
+        <div className="p-4 rounded-2xl bg-rose-50 border-2 border-[#E11D48] text-[#E11D48] text-xs font-bold flex justify-between items-center shadow-xs">
           <span>{error}</span>
-          <button onClick={() => setError('')} className="font-bold ml-2">Dismiss</button>
+          <button onClick={() => setError('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
         </div>
       )}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex justify-between items-center">
+        <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 text-emerald-800 text-xs font-bold flex justify-between items-center shadow-xs">
           <span>{successMsg}</span>
-          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2">Dismiss</button>
+          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
         </div>
       )}
 
       {/* Group Cards List */}
       {loading ? (
         <div className="py-12 flex justify-center">
-          <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-3 border-[#1c1917] border-t-[#E11D48] rounded-full animate-spin"></div>
         </div>
       ) : groups.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {groups.map((grp) => (
             <div
               key={grp.id}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+              className="bg-white rounded-3xl p-6 border-2 border-[#1c1917] shadow-[5px_5px_0px_0px_#1c1917] hover:shadow-[7px_7px_0px_0px_#1c1917] transition-all flex flex-col justify-between space-y-4"
             >
               <div>
                 {/* Header */}
                 <div className="flex justify-between items-start gap-3">
                   <div>
                     {grp.course_name && (
-                      <div className="mb-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-semibold">
-                        <span className="font-mono font-bold">[{grp.course_code}]</span>
+                      <div className="mb-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#FAF7F2] border border-stone-300 text-stone-900 text-xs font-bold">
+                        <span className="font-mono text-[#E11D48]">[{grp.course_code}]</span>
                         <span>{grp.course_name}</span>
                         {grp.professor_name && (
-                          <span className="text-slate-400 font-normal">• Prof. {grp.professor_name}</span>
+                          <span className="text-stone-400 font-normal">&bull; Prof. {grp.professor_name}</span>
                         )}
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-bold text-slate-900 tracking-tight">{grp.name}</h3>
+                      <h3 className="font-display text-2xl text-[#1c1917] tracking-tight">{grp.name}</h3>
                       {grp.my_role === 'leader' ? (
                         <Badge variant="leader" label="Leader" />
                       ) : (
@@ -222,34 +230,34 @@ export default function GroupsPage() {
                       )}
                     </div>
                     {grp.description && (
-                      <p className="text-xs text-slate-500 mt-1">{grp.description}</p>
+                      <p className="text-xs text-stone-600 mt-1 font-medium leading-relaxed">{grp.description}</p>
                     )}
                   </div>
 
                   {/* Join code pill */}
                   <button
                     onClick={() => copyToClipboard(grp.join_code)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-mono font-bold transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border-2 border-[#1c1917] bg-[#FAF7F2] hover:bg-[#1c1917] hover:text-white text-stone-900 text-xs font-mono font-bold transition-all shadow-xs cursor-pointer"
                     title="Click to copy join code"
                   >
-                    {grp.join_code}
+                    <span>{grp.join_code}</span>
                     {copiedCode === grp.join_code ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5 text-slate-400" />
+                      <Copy className="w-3.5 h-3.5 text-stone-500" />
                     )}
                   </button>
                 </div>
 
                 {/* Members Section */}
-                <div className="mt-5 pt-4 border-t border-slate-100">
+                <div className="mt-5 pt-4 border-t-2 border-stone-100">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
                       Team Members ({grp.members?.length || 0})
                     </span>
                     <button
                       onClick={() => setActiveGroupIdForInvite(activeGroupIdForInvite === grp.id ? null : grp.id)}
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                      className="text-xs font-bold uppercase tracking-wider text-[#E11D48] hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       Add Member
@@ -258,51 +266,51 @@ export default function GroupsPage() {
 
                   {/* Add member input box */}
                   {activeGroupIdForInvite === grp.id && (
-                    <div className="mb-4 p-3.5 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-2">
-                      <div className="text-[11px] font-bold text-indigo-900">
-                        Add peer by Student Email or Student ID:
+                    <div className="mb-4 p-4 bg-[#FAF7F2] rounded-2xl border-2 border-[#1c1917] space-y-2">
+                      <div className="text-[11px] font-bold text-stone-900 uppercase tracking-wider">
+                        Invite peer by Student Email or Student ID:
                       </div>
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          placeholder="e.g. emma@joineazy.com or STU2024-002"
+                          placeholder="e.g. emma@university.edu or STU2024-002"
                           value={studentIdentifier}
                           onChange={(e) => setStudentIdentifier(e.target.value)}
-                          className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-indigo-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="flex-1 px-3.5 py-2 text-xs rounded-xl border-2 border-[#1c1917] bg-white text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                         />
                         <button
                           onClick={() => handleAddMember(grp.id)}
-                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-colors"
+                          className="px-4 py-2 bg-[#1c1917] hover:bg-[#E11D48] text-white text-xs font-display uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs"
                         >
-                          Add
+                          Invite
                         </button>
                       </div>
                     </div>
                   )}
 
-                  {/* Member avatars & list */}
+                  {/* Member list */}
                   <div className="space-y-2">
                     {grp.members?.map((member) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors text-xs"
+                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-50 transition-colors text-xs font-medium border border-transparent hover:border-stone-200"
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-700 text-[11px]">
+                          <div className="w-8 h-8 rounded-xl bg-white border border-[#1c1917] flex items-center justify-center font-display text-xs text-stone-900 shadow-xs">
                             {member.name.charAt(0)}
                           </div>
                           <div>
-                            <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                            <div className="font-bold text-stone-900 flex items-center gap-1.5">
                               {member.name}
                               {member.id === user.id && (
-                                <span className="text-[10px] text-indigo-600 font-semibold">(You)</span>
+                                <span className="text-[10px] text-[#E11D48] font-bold">(You)</span>
                               )}
                               {member.role === 'leader' && (
-                                <Crown className="w-3 h-3 text-amber-500" />
+                                <Crown className="w-3.5 h-3.5 text-amber-500" />
                               )}
                             </div>
-                            <div className="text-[11px] text-slate-400">
-                              {member.email} {member.student_id ? `• ${member.student_id}` : ''}
+                            <div className="text-[11px] text-stone-500 font-mono">
+                              {member.email} {member.student_id ? `&bull; ${member.student_id}` : ''}
                             </div>
                           </div>
                         </div>
@@ -311,7 +319,7 @@ export default function GroupsPage() {
                         {(grp.my_role === 'leader' || member.id === user.id) && (
                           <button
                             onClick={() => handleRemoveMember(grp.id, member.id, member.id === user.id)}
-                            className="text-slate-400 hover:text-red-600 p-1 rounded-lg transition-colors"
+                            className="text-stone-400 hover:text-rose-600 p-1.5 rounded-lg transition-colors cursor-pointer"
                             title={member.id === user.id ? 'Leave group' : 'Remove member'}
                           >
                             {member.id === user.id ? (
@@ -327,32 +335,32 @@ export default function GroupsPage() {
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex justify-between items-center">
-                <span>Created {new Date(grp.created_at).toLocaleDateString()}</span>
-                <span>Share Code: <strong className="text-slate-700 font-mono">{grp.join_code}</strong></span>
+              <div className="mt-4 pt-3 border-t-2 border-stone-100 text-[11px] text-stone-500 flex justify-between items-center font-medium">
+                <span>Created: {new Date(grp.created_at).toLocaleDateString()}</span>
+                <span>Code: <strong className="text-stone-900 font-mono">{grp.join_code}</strong></span>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-3xl p-10 text-center border border-dashed border-slate-300 max-w-lg mx-auto space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+        <div className="bg-white rounded-3xl p-10 text-center border-2 border-dashed border-[#1c1917] max-w-lg mx-auto space-y-4 shadow-[4px_4px_0px_0px_#1c1917]">
+          <div className="w-12 h-12 rounded-2xl bg-stone-100 border border-[#1c1917] flex items-center justify-center mx-auto text-[#1c1917]">
             <Users className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">You are not in any group yet</h3>
-          <p className="text-xs text-slate-500">
-            Create your own study and project group, or join an existing group using a join code provided by a classmate.
+          <h3 className="font-display text-2xl text-[#1c1917]">YOU ARE NOT IN ANY GROUP YET</h3>
+          <p className="text-xs text-stone-600 font-medium max-w-sm mx-auto">
+            Create your own project group under your subject, or join an existing group using a code provided by a classmate.
           </p>
           <div className="flex justify-center gap-3 pt-2">
             <button
               onClick={() => setShowJoinModal(true)}
-              className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
+              className="px-5 py-2.5 border-2 border-[#1c1917] rounded-xl text-xs font-bold uppercase tracking-wider text-stone-800 hover:bg-stone-50 transition-all cursor-pointer"
             >
               Join with Code
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md shadow-indigo-100"
+              className="px-5 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-white rounded-xl text-xs font-display uppercase tracking-wider shadow-md transition-all cursor-pointer"
             >
               Create Group
             </button>
@@ -362,23 +370,31 @@ export default function GroupsPage() {
 
       {/* Modal: Create Group */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Create a New Group</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              You will automatically become the group leader and can invite your classmates.
-            </p>
+        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-[8px_8px_0px_0px_#1c1917] border-2 border-[#1c1917] animate-in fade-in duration-200">
+            <div className="flex justify-between items-center mb-4 border-b-2 border-[#1c1917] pb-3">
+              <div>
+                <h3 className="font-display text-2xl text-[#1c1917]">CREATE NEW GROUP</h3>
+                <p className="text-xs text-stone-500 font-medium">You will automatically become the group leader.</p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             <form onSubmit={handleCreateGroup} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                   Subject / Course (Optional)
                 </label>
                 {availableCourses.length > 0 ? (
                   <select
                     value={selectedCourseId}
                     onChange={(e) => setSelectedCourseId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E11D48] bg-white cursor-pointer"
                   >
                     <option value="">-- Choose Subject / Course (or enter code below) --</option>
                     {availableCourses.map((c) => (
@@ -395,13 +411,13 @@ export default function GroupsPage() {
                     value={courseCodeInput}
                     onChange={(e) => setCourseCodeInput(e.target.value.toUpperCase())}
                     placeholder="Or enter Professor's Course Code (e.g. CS401-7M9K)"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 uppercase font-mono placeholder:normal-case placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border-2 border-[#1c1917] uppercase font-mono font-bold placeholder:normal-case placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                   Group Name
                 </label>
                 <input
@@ -410,12 +426,12 @@ export default function GroupsPage() {
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   placeholder="e.g. Distributed Systems Lab Group 4"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-sm text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                   Description / Topic (Optional)
                 </label>
                 <textarea
@@ -423,21 +439,21 @@ export default function GroupsPage() {
                   value={newGroupDesc}
                   onChange={(e) => setNewGroupDesc(e.target.value)}
                   placeholder="What is this group focusing on?"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                 />
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-2">
+              <div className="flex justify-end gap-2.5 pt-3 border-t-2 border-stone-200">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                  className="px-6 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-sm uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
                 >
                   Create Group
                 </button>
@@ -449,16 +465,24 @@ export default function GroupsPage() {
 
       {/* Modal: Join with Code */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Join Group with Code</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Enter the unique 8-character join code provided by your group leader.
-            </p>
+        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-[8px_8px_0px_0px_#1c1917] border-2 border-[#1c1917] animate-in fade-in duration-200">
+            <div className="flex justify-between items-center mb-4 border-b-2 border-[#1c1917] pb-3">
+              <div>
+                <h3 className="font-display text-2xl text-[#1c1917]">JOIN WITH CODE</h3>
+                <p className="text-xs text-stone-500 font-medium">Enter 8-char code from group leader.</p>
+              </div>
+              <button
+                onClick={() => setShowJoinModal(false)}
+                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             <form onSubmit={handleJoinByCode} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                   Join Code
                 </label>
                 <input
@@ -467,21 +491,21 @@ export default function GroupsPage() {
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   placeholder="e.g. GRP-ALPHA"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-sm font-mono uppercase font-bold focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                 />
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-2">
+              <div className="flex justify-end gap-2.5 pt-3 border-t-2 border-stone-200">
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                  className="px-6 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-sm uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
                 >
                   Join Group
                 </button>
@@ -490,6 +514,7 @@ export default function GroupsPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
