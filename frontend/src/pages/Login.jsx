@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { GraduationCap, Lock, Mail, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { GraduationCap, Lock, Mail, ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,19 +24,9 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fillDemo = async (role) => {
-    if (role === 'admin') {
-      setEmail('admin@joineazy.com');
-      setPassword('admin123');
-    } else {
-      setEmail('alex@joineazy.com');
-      setPassword('student123');
     }
   };
 
@@ -54,36 +44,6 @@ export default function Login() {
           <p className="mt-1.5 text-xs text-slate-500 font-medium">
             Student, Group & Assignment Management Platform
           </p>
-        </div>
-
-        {/* 1-Click Quick Demo Accounts */}
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2.5">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            Quick Demo Logins (Click to Autofill):
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => fillDemo('admin')}
-              className="text-left px-3 py-2 bg-white hover:border-indigo-400 border border-slate-200 rounded-xl transition-all shadow-xs group"
-            >
-              <div className="text-[11px] font-bold text-indigo-700 group-hover:text-indigo-800">
-                Professor (Admin)
-              </div>
-              <div className="text-[10px] text-slate-500 truncate">admin@joineazy.com</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemo('student')}
-              className="text-left px-3 py-2 bg-white hover:border-indigo-400 border border-slate-200 rounded-xl transition-all shadow-xs group"
-            >
-              <div className="text-[11px] font-bold text-indigo-700 group-hover:text-indigo-800">
-                Student (Alex)
-              </div>
-              <div className="text-[10px] text-slate-500 truncate">alex@joineazy.com</div>
-            </button>
-          </div>
         </div>
 
         {error && (
@@ -106,7 +66,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@joineazy.com"
+                placeholder="name@university.edu"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -142,7 +102,7 @@ export default function Login() {
         </form>
 
         <div className="text-center text-xs text-slate-500">
-          New student?{' '}
+          Don't have an account yet?{' '}
           <Link to="/register" className="font-bold text-indigo-600 hover:text-indigo-700">
             Create an account
           </Link>

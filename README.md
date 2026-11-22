@@ -288,17 +288,21 @@ No separate PostgreSQL installation required! If PostgreSQL is not running, the 
 
 ---
 
-## 🔑 Pre-configured Demo Accounts
+## 🔑 User Registration & Roles
 
-For immediate evaluation, the login page features **1-Click Demo Buttons** to autofill and log into these pre-seeded accounts:
+The system starts with a completely clean database (no fake/dummy data). You can register real accounts directly from the **Register** page:
 
-| Role | Name | Email | Password | Identifier |
-| :--- | :--- | :--- | :--- | :--- |
-| **Professor (Admin)** | Prof. Dr. Sarah Jenkins | `admin@joineazy.com` | `admin123` | N/A |
-| **Student (Leader)** | Alex Rivera | `alex@joineazy.com` | `student123` | `STU2024-001` |
-| **Student (Member)** | Emma Watson | `emma@joineazy.com` | `student123` | `STU2024-002` |
-| **Student (Leader)** | Liam Chen | `liam@joineazy.com` | `student123` | `STU2024-003` |
-| **Student (Member)** | Sophia Patel | `sophia@joineazy.com` | `student123` | `STU2024-004` |
+1. **Register as Student**:
+   - Go to [http://localhost:3000/register](http://localhost:3000/register)
+   - Select **"Student"**
+   - Provide Name, Email, Student ID, and Password
+   - Form groups, invite peers, view coursework, and submit via 2-step verification
+
+2. **Register as Professor (Admin)**:
+   - Go to [http://localhost:3000/register](http://localhost:3000/register)
+   - Select **"Professor (Admin)"**
+   - Provide Name, Email, and Password
+   - Post assignments, assign coursework to all or specific groups, and track group-wise and student-wise submission confirmations
 
 ---
 
