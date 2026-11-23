@@ -202,7 +202,9 @@ const addMember = async (req, res, next) => {
     const isEmail = identifier.includes('@');
 
     // Build join URL & friendly invite content
-    const clientOrigin = req.headers.origin || 'http://localhost:3000';
+    const host = req.get('host');
+    const proto = req.headers['x-forwarded-proto'] || req.protocol;
+    const clientOrigin = process.env.CLIENT_URL || req.headers.origin || (host ? `${proto}://${host}` : 'http://localhost:3000');
     const joinUrl = `${clientOrigin}/groups?join=${group.join_code}`;
     const courseLabel = group.course_code ? `${group.course_code} (${group.course_name})` : (group.course_name || 'Academic Course');
     const mailSubject = `[JoinEazy] ${req.user.name} invited you to join team "${group.name}"`;

@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 require('dotenv').config();
 const express = require('express');
@@ -16,6 +17,9 @@ const supportRoutes = require('./routes/supportRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Trust reverse proxy (Render, Cloudflare, Nginx) for HTTPS headers
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
@@ -48,6 +52,18 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/support', supportRoutes);
+
+// Serve static frontend in production if built
+const frontendDist = path.join(__dirname, '../../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl === '/health') {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // Error Handling Middleware
 app.use(errorHandler);
