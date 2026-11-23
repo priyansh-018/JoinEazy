@@ -143,37 +143,7 @@ async function sendGroupInvitation({
 
   const textContent = `Hi,\n\n${inviterName} has invited you to join their student team "${groupName}" for ${courseDisplay} on JoinEazy.\n\nAccept invitation by clicking the link below:\n${joinUrl}\n\nGroup Join Code: ${joinCode}\n\nIf you don't have an account yet, sign up as a student and you'll be automatically enrolled.\n\nBest,\nJoinEazy Team`;
 
-  // Option 1: Send via Resend REST API (HTTPS port 443, never blocked by cloud hosts)
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const { Resend } = require('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const fromAddr = process.env.RESEND_FROM || 'JoinEazy <onboarding@resend.dev>';
-      const resendRes = await resend.emails.send({
-        from: fromAddr,
-        to: [to],
-        subject,
-        html: htmlContent,
-        text: textContent
-      });
-
-      if (resendRes.error) {
-        throw new Error(resendRes.error.message || 'Resend API error');
-      }
-
-      console.log(`[Email Dispatched via Resend HTTPS]: ID ${resendRes.data?.id} delivered to ${to}`);
-      return {
-        sent: true,
-        mode: 'resend_live',
-        messageId: resendRes.data?.id,
-        message: `Invitation email dispatched directly to ${to}!`
-      };
-    } catch (err) {
-      console.warn('[Resend API Error]:', err.message);
-    }
-  }
-
-  // Option 2: Send via Google Apps Script Webhook (Sends directly from your Gmail to ANY recipient over HTTPS 443, no domain needed)
+  // Option 1: Send via Google Apps Script Webhook (Sends directly from your Gmail to ANY recipient over HTTPS 443, no domain needed)
   if (process.env.GMAIL_WEBHOOK_URL) {
     try {
       const gRes = await fetch(process.env.GMAIL_WEBHOOK_URL, {
@@ -216,6 +186,42 @@ async function sendGroupInvitation({
       }
     } catch (err) {
       console.warn('[Gmail Webhook Error]:', err.message);
+    }
+  }
+
+  // Option 2: Send via Resend REST API (HTTPS port 443)
+  if (process.env.RESEND_API_KEY) {
+    const fromAddr = process.env.RESEND_FROM || 'JoinEazy <onboarding@resend.dev>';
+    const isTestingDomain = fromAddr.includes('resend.dev');
+    const isOwner = to.toLowerCase() === 'priyansh191882@gmail.com';
+
+    // Skip Resend if on free test domain and sending to external friend (avoids 403 error in logs)
+    if (!isTestingDomain || isOwner) {
+      try {
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const resendRes = await resend.emails.send({
+          from: fromAddr,
+          to: [to],
+          subject,
+          html: htmlContent,
+          text: textContent
+        });
+
+        if (resendRes.error) {
+          throw new Error(resendRes.error.message || 'Resend API error');
+        }
+
+        console.log(`[Email Dispatched via Resend HTTPS]: ID ${resendRes.data?.id} delivered to ${to}`);
+        return {
+          sent: true,
+          mode: 'resend_live',
+          messageId: resendRes.data?.id,
+          message: `Invitation email dispatched directly to ${to}!`
+        };
+      } catch (err) {
+        console.warn('[Resend API Notice]:', err.message);
+      }
     }
   }
 
