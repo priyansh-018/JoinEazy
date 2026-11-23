@@ -18,10 +18,6 @@ import {
   Search,
   BookOpen,
   X,
-  Mail,
-  ExternalLink,
-  Send,
-  CheckCircle2,
   Share2
 } from 'lucide-react';
 
@@ -47,11 +43,6 @@ export default function GroupsPage() {
   const [activeGroupIdForInvite, setActiveGroupIdForInvite] = useState(null);
   const [studentIdentifier, setStudentIdentifier] = useState('');
   const [copiedCode, setCopiedCode] = useState('');
-
-  // Friend email invite modal state
-  const [pendingInviteModal, setPendingInviteModal] = useState(null);
-  const [copiedInviteLink, setCopiedInviteLink] = useState(false);
-  const [copiedInviteMsg, setCopiedInviteMsg] = useState(false);
 
   // Auto-detect ?join=CODE in URL (e.g. from invite email link)
   useEffect(() => {
@@ -141,28 +132,11 @@ export default function GroupsPage() {
         setStudentIdentifier('');
         setActiveGroupIdForInvite(null);
         fetchMyGroups();
-
-        if (res.data.inviteDetails) {
-          setPendingInviteModal(res.data.inviteDetails);
-        } else {
-          setSuccessMsg(res.data.message);
-        }
+        setSuccessMsg(res.data.message);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add member.');
     }
-  };
-
-  const handleCopyInviteLink = (url) => {
-    navigator.clipboard.writeText(url);
-    setCopiedInviteLink(true);
-    setTimeout(() => setCopiedInviteLink(false), 2500);
-  };
-
-  const handleCopyInviteMessage = (msg) => {
-    navigator.clipboard.writeText(msg);
-    setCopiedInviteMsg(true);
-    setTimeout(() => setCopiedInviteMsg(false), 2500);
   };
 
   const handleRemoveMember = async (groupId, memberUserId, isSelf) => {
@@ -551,128 +525,6 @@ export default function GroupsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Direct Friend Email Invitation */}
-      {pendingInviteModal && (
-        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-[8px_8px_0px_0px_#1c1917] border-2 border-[#1c1917] animate-in fade-in duration-200 space-y-6">
-            
-            {/* Header */}
-            <div className="flex justify-between items-start border-b-2 border-[#1c1917] pb-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-950 border-2 border-emerald-700 mb-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                  INVITATION DISPATCH READY
-                </div>
-                <h3 className="font-display text-3xl text-[#1c1917]">
-                  INVITE TO TEAM
-                </h3>
-                <p className="font-script text-lg text-stone-600 mt-0.5">
-                  Send invite link for <span className="font-bold text-stone-900">{pendingInviteModal.groupName}</span>
-                </p>
-              </div>
-              <button
-                onClick={() => setPendingInviteModal(null)}
-                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Recipient callout */}
-            <div className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-[#1c1917] flex justify-between items-center gap-3">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
-                  Recipient Friend's Email:
-                </span>
-                <span className="font-mono font-bold text-sm text-stone-900 break-all">
-                  {pendingInviteModal.recipientEmail}
-                </span>
-              </div>
-              <span className="px-3 py-1 rounded-xl bg-[#1c1917] text-white text-xs font-mono font-bold tracking-wider shrink-0">
-                {pendingInviteModal.joinCode}
-              </span>
-            </div>
-
-            {/* Direct Join Link Box */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-stone-800">
-                Direct Join Link (Pre-fills code on arrival):
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={pendingInviteModal.joinUrl}
-                  className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] bg-stone-50 font-mono text-xs text-stone-800 select-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleCopyInviteLink(pendingInviteModal.joinUrl)}
-                  className="px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] bg-white hover:bg-[#1c1917] hover:text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
-                >
-                  {copiedInviteLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedInviteLink ? 'Copied' : 'Copy'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Email dispatch options */}
-            <div className="space-y-2.5 pt-2 border-t-2 border-stone-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 block">
-                Send Invitation to Friend:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <a
-                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(pendingInviteModal.recipientEmail)}&su=${encodeURIComponent(pendingInviteModal.mailSubject)}&body=${encodeURIComponent(pendingInviteModal.mailBody)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#1c1917] hover:bg-[#1c1917] hover:text-white text-stone-900 text-xs font-bold uppercase tracking-wider transition-all shadow-xs"
-                >
-                  <Mail className="w-3.5 h-3.5 text-rose-500" />
-                  <span>Send via Gmail Web</span>
-                  <ExternalLink className="w-3 h-3 ml-auto text-stone-400" />
-                </a>
-
-                <a
-                  href={`mailto:${pendingInviteModal.recipientEmail}?subject=${encodeURIComponent(pendingInviteModal.mailSubject)}&body=${encodeURIComponent(pendingInviteModal.mailBody)}`}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#1c1917] hover:bg-[#1c1917] hover:text-white text-stone-900 text-xs font-bold uppercase tracking-wider transition-all shadow-xs"
-                >
-                  <Send className="w-3.5 h-3.5 text-stone-700" />
-                  <span>Default Mail App</span>
-                  <ExternalLink className="w-3 h-3 ml-auto text-stone-400" />
-                </a>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleCopyInviteMessage(pendingInviteModal.mailBody)}
-                className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl border-2 border-[#1c1917] bg-[#FAF7F2] hover:bg-[#1c1917] hover:text-white text-stone-800 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs"
-              >
-                {copiedInviteMsg ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedInviteMsg ? 'Invitation Message Copied!' : 'Copy Full Message for WhatsApp / Discord'}</span>
-              </button>
-            </div>
-
-            {/* Explanation Note */}
-            <p className="text-[11px] text-stone-500 font-medium">
-              💡 <em>When your friend opens the link, they can sign in or register with one click and JoinEazy will automatically pre-fill your group code to join your team!</em>
-            </p>
-
-            {/* Footer Close */}
-            <div className="flex justify-end pt-2 border-t-2 border-stone-200">
-              <button
-                type="button"
-                onClick={() => setPendingInviteModal(null)}
-                className="px-6 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-sm uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
-              >
-                Close Window
-              </button>
-            </div>
-
           </div>
         </div>
       )}

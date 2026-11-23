@@ -1,5 +1,6 @@
 const db = require('../db/db');
 const nodemailer = require('nodemailer');
+const { sendGroupInvitation } = require('../services/emailService');
 
 // Generate unique join code for easy team joining
 const generateJoinCode = () => {
@@ -243,90 +244,41 @@ const addMember = async (req, res, next) => {
         [id, studentToAdd.id]
       );
 
-      // Attempt background email dispatch via nodemailer if SMTP configured
-      let emailDispatched = false;
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        try {
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '587', 10),
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS
-            }
-          });
-          await transporter.sendMail({
-            from: `"JoinEazy Groups" <${process.env.SMTP_USER}>`,
-            to: studentToAdd.email,
-            subject: mailSubject,
-            text: mailBody
-          });
-          emailDispatched = true;
-        } catch (err) {
-          console.warn('[Invite Email Dispatch Warning]:', err.message);
-        }
-      }
+      // Directly dispatch invitation email to the student
+      sendGroupInvitation({
+        to: studentToAdd.email,
+        inviterName: req.user.name,
+        groupName: group.name,
+        courseCode: group.course_code,
+        courseName: group.course_name,
+        joinCode: group.join_code,
+        joinUrl
+      }).catch(err => console.warn('[Invite Email Dispatch Warning]:', err.message));
 
       return res.status(201).json({
         success: true,
         addedDirectly: true,
-        message: `${studentToAdd.name} added to the group successfully!${emailDispatched ? ' Invitation email dispatched.' : ''}`,
-        member: studentToAdd,
-        inviteDetails: {
-          recipientEmail: studentToAdd.email,
-          groupName: group.name,
-          courseCode: group.course_code,
-          joinCode: group.join_code,
-          joinUrl,
-          mailSubject,
-          mailBody,
-          emailDispatched
-        }
+        message: `${studentToAdd.name} added to the group successfully! An invitation email has been sent to their inbox.`
       });
     }
 
     // CASE 2: Student is NOT registered yet, but an email was entered!
     if (isEmail) {
-      let emailDispatched = false;
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        try {
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '587', 10),
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS
-            }
-          });
-          await transporter.sendMail({
-            from: `"JoinEazy Groups" <${process.env.SMTP_USER}>`,
-            to: identifier,
-            subject: mailSubject,
-            text: mailBody
-          });
-          emailDispatched = true;
-        } catch (err) {
-          console.warn('[Invite Email Dispatch Warning]:', err.message);
-        }
-      }
+      // Directly dispatch invitation email with join link & instructions
+      sendGroupInvitation({
+        to: identifier,
+        inviterName: req.user.name,
+        groupName: group.name,
+        courseCode: group.course_code,
+        courseName: group.course_name,
+        joinCode: group.join_code,
+        joinUrl
+      }).catch(err => console.warn('[Invite Email Dispatch Warning]:', err.message));
 
       return res.status(200).json({
         success: true,
         addedDirectly: false,
-        message: `Direct group invitation generated for ${identifier}!`,
-        inviteDetails: {
-          recipientEmail: identifier,
-          groupName: group.name,
-          courseName: group.course_name,
-          courseCode: group.course_code,
-          joinCode: group.join_code,
-          joinUrl,
-          mailSubject,
-          mailBody,
-          emailDispatched
-        }
+        message: `Invitation email dispatched directly to ${identifier}! A link to join team "${group.name}" has been sent to their inbox.`
       });
     }
 
