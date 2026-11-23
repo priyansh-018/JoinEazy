@@ -310,7 +310,7 @@ export default function GroupsPage() {
                               )}
                             </div>
                             <div className="text-[11px] text-stone-500 font-mono">
-                              {member.email} {member.student_id ? `&bull; ${member.student_id}` : ''}
+                              {member.email} {member.student_id ? `• ${member.student_id}` : ''}
                             </div>
                           </div>
                         </div>

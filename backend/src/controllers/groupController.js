@@ -192,10 +192,21 @@ const addMember = async (req, res, next) => {
     );
 
     if (studentRes.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Student not found with that email or student ID.' });
+      return res.status(404).json({
+        success: false,
+        message: 'No registered student found with that email or Student ID. Please ensure they have created a student account first, or share your group invite code with them.'
+      });
     }
 
     const studentToAdd = studentRes.rows[0];
+
+    // Check if user is a professor/admin
+    if (studentToAdd.role === 'admin') {
+      return res.status(400).json({
+        success: false,
+        message: `${studentToAdd.name} (${studentToAdd.email}) is registered as a Professor/Instructor and cannot be added to a student group.`
+      });
+    }
 
     // Check if already in group
     const alreadyMember = await db.query(
