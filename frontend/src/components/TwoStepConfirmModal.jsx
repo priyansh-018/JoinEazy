@@ -173,7 +173,7 @@ export default function TwoStepConfirmModal({
                   Step 2: Final Submission Confirmation
                 </span>
                 <p className="text-stone-600 mt-0.5 font-medium leading-relaxed">
-                  I confirm this submission on behalf of my group and understand it is logged to Neon PostgreSQL and verified by the professor.
+                  I confirm this submission on behalf of my group and understand it will be logged in institutional records and verified by the instructor.
                 </p>
               </div>
             </label>

@@ -397,7 +397,7 @@ export default function AdminAssignmentsPage() {
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Milestone 2: Cloud Infrastructure & Database Setup"
+                  placeholder="e.g. Milestone 2: Cloud Systems Architecture & Implementation"
                   className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-sm text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
                 />
               </div>

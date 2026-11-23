@@ -1,7 +1,7 @@
 {
   "name": "joineazy-monorepo",
   "version": "1.0.0",
-  "description": "Joineazy Student, Group & Assignment Management System",
+  "description": "JoinEazy Academic Coursework & Student Group Management Platform",
   "scripts": {
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
@@ -18,6 +18,6 @@
     "postgresql",
     "fullstack"
   ],
-  "author": "Full Stack Intern Candidate",
+  "author": "JoinEazy Engineering Team",
   "license": "MIT"
 }

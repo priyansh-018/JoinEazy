@@ -103,11 +103,11 @@ export default function LandingPage() {
     },
     {
       q: 'Is our coursework and group data permanently stored?',
-      a: 'Yes, 100%. JoinEazy is integrated with a cloud PostgreSQL database (Neon DB) with schema enforcement and automated persistent backups, ensuring zero data loss across sessions, server restarts, or device switches.'
+      a: 'Yes, 100%. JoinEazy features real-time cloud data synchronization with automated backups and session persistence, guaranteeing zero coursework or group data loss across devices, network interruptions, or page refreshes.'
     },
     {
       q: 'How do I reach human support if I encounter an issue?',
-      a: 'Click "Need Help?" or "Contact Support" anywhere on the site. Inquiries route directly to priyansh191882@gmail.com and are logged to our cloud database ticket queue.'
+      a: 'Click "Need Help?" or "Contact Support" anywhere on the platform. Inquiries route directly to our priority support desk at priyansh191882@gmail.com with dedicated response tracking.'
     }
   ];
 
@@ -261,8 +261,8 @@ export default function LandingPage() {
                 2026
               </div>
               <div className="text-[10px] font-bold text-stone-500 leading-tight">
-                NEON CLOUD POSTGRESQL<br />
-                <span className="text-emerald-700 font-mono">100% PERSISTENT</span>
+                ENTERPRISE READY<br />
+                <span className="text-emerald-700 font-mono">CLOUD SYNCHRONIZED</span>
               </div>
             </div>
           </div>
@@ -313,7 +313,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#D5CCC0] text-xs font-bold uppercase tracking-wider text-stone-700 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-[#E11D48] animate-pulse"></span>
-                <span>Full Stack Technical Task &bull; Role-Based Management System</span>
+                <span>Unified Academic Platform &bull; Coursework &amp; Cohort Management</span>
               </div>
               <div className="font-script text-2xl text-[#E11D48]">
                 Streamlined group formation &amp; submission accountability
@@ -415,7 +415,7 @@ export default function LandingPage() {
                             <span className="text-stone-400 font-mono text-xs">Assigned to: Binary Pioneers (Group #4)</span>
                           </div>
                           <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                            Milestone 2: Distributed Database Architecture
+                            Milestone 2: Distributed Cloud Systems Architecture
                           </h3>
                         </div>
                         <div className="text-right">
@@ -507,7 +507,7 @@ export default function LandingPage() {
                             </div>
                             <div className="text-xs">
                               <span className="font-bold text-white block">Step 2: Final Submission Lock</span>
-                              <span className="text-stone-400 text-[11px]">Locks submission timestamp in cloud Neon DB.</span>
+                              <span className="text-stone-400 text-[11px]">Locks verifiable timestamp in institutional records.</span>
                             </div>
                           </button>
                         </div>
@@ -522,7 +522,7 @@ export default function LandingPage() {
                           <span className="px-2 py-0.5 rounded-md bg-stone-800 text-amber-400 text-[11px]">Morgan Wu &bull; Pending</span>
                         </div>
                         <span className="font-mono text-emerald-400 font-bold text-[11px]">
-                          NEON CLOUD SYNCED
+                          CLOUD SYNCHRONIZED
                         </span>
                       </div>
                     </div>
@@ -633,15 +633,15 @@ export default function LandingPage() {
         <div className="py-4 bg-[#1c1917] text-[#FAF7F2] overflow-hidden whitespace-nowrap border-y-2 border-[#1c1917]">
           <div className="animate-marquee font-display text-xl sm:text-2xl tracking-widest uppercase flex items-center gap-8 select-none">
             <span>&bull; TWO-STEP VERIFICATION PROTOCOL</span>
-            <span className="text-[#E11D48]">&bull; ONEDRIVE DIRECT LINKING</span>
-            <span>&bull; ISOLATED PROFESSOR COURSES</span>
-            <span className="text-emerald-400">&bull; CLOUD NEON POSTGRESQL</span>
+            <span className="text-[#E11D48]">&bull; ONEDRIVE INTEGRATION</span>
+            <span>&bull; SUBJECT &amp; COURSE ROSTERS</span>
+            <span className="text-emerald-400">&bull; REAL-TIME CLOUD SYNCHRONIZATION</span>
             <span>&bull; INDIVIDUAL PARTICIPATION TRACKING</span>
-            <span className="text-amber-400">&bull; REAL-TIME PROGRESS BARS</span>
+            <span className="text-amber-400">&bull; PROGRESS &amp; MILESTONE ANALYTICS</span>
             <span>&bull; TWO-STEP VERIFICATION PROTOCOL</span>
-            <span className="text-[#E11D48]">&bull; ONEDRIVE DIRECT LINKING</span>
-            <span>&bull; ISOLATED PROFESSOR COURSES</span>
-            <span className="text-emerald-400">&bull; CLOUD NEON POSTGRESQL</span>
+            <span className="text-[#E11D48]">&bull; ONEDRIVE INTEGRATION</span>
+            <span>&bull; SUBJECT &amp; COURSE ROSTERS</span>
+            <span className="text-emerald-400">&bull; REAL-TIME CLOUD SYNCHRONIZATION</span>
           </div>
         </div>
 
@@ -755,9 +755,9 @@ export default function LandingPage() {
                 <div className="w-12 h-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center font-bold">
                   <Database className="w-6 h-6" />
                 </div>
-                <h4 className="font-display text-2xl text-[#1c1917]">CLOUD PERSISTENCE</h4>
+                <h4 className="font-display text-2xl text-[#1c1917]">INSTITUTIONAL RELIABILITY</h4>
                 <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                  Connected to Neon Cloud PostgreSQL with automatic schema verification and local disk backup. Zero lost submissions or courses.
+                  Engineered with resilient cloud replication, automated verification, and fail-safe redundancy. Guarantees zero lost coursework or submissions across cohorts.
                 </p>
               </div>
 
@@ -853,7 +853,7 @@ export default function LandingPage() {
               <span>&bull; Academic Student &amp; Group Management Platform</span>
             </div>
             <div>
-              &copy; 2026 JoinEazy. Connected to Neon Cloud PostgreSQL.
+              &copy; 2026 JoinEazy. All rights reserved. Academic Coursework &amp; Group Collaboration Platform.
             </div>
           </div>
 

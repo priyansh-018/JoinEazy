@@ -159,24 +159,32 @@ async function initDB() {
   let usePg = Boolean(databaseUrl);
 
   if (usePg) {
-    try {
-      console.log('Attempting PostgreSQL connection via DATABASE_URL...');
-      const isRemote = databaseUrl.includes('neon.tech') || databaseUrl.includes('supabase') || !databaseUrl.includes('localhost');
-      const testPool = new Pool({
-        connectionString: databaseUrl,
-        ssl: isRemote ? { rejectUnauthorized: false } : false
-      });
-      await testPool.query('SELECT 1');
-      pool = testPool;
-      console.log('Connected to real PostgreSQL database successfully (persistent).');
+    const isRemote = databaseUrl.includes('neon.tech') || databaseUrl.includes('supabase') || !databaseUrl.includes('localhost');
+    const testPool = new Pool({
+      connectionString: databaseUrl,
+      ssl: isRemote ? { rejectUnauthorized: false } : false
+    });
 
-      // Run schema
-      await pool.query(schemaSql);
-      console.log('Database tables verified and ready on Neon PostgreSQL.');
-      return;
-    } catch (err) {
-      console.warn('Could not connect to PostgreSQL database:', err.message);
-      console.log('Falling back to zero-setup embedded engine with local disk persistence...');
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`Attempting PostgreSQL connection via DATABASE_URL (attempt ${attempt}/3)...`);
+        await testPool.query('SELECT 1');
+        pool = testPool;
+        console.log('Connected to real PostgreSQL database successfully (persistent).');
+
+        // Run schema
+        await pool.query(schemaSql);
+        console.log('Database tables verified and ready on Neon PostgreSQL.');
+        return;
+      } catch (err) {
+        console.warn(`Attempt ${attempt} to connect to PostgreSQL failed:`, err.message);
+        if (attempt < 3) {
+          console.log('Waiting 1.5s for Neon pooler wake-up...');
+          await new Promise(r => setTimeout(r, 1500));
+        } else {
+          console.log('Falling back to zero-setup embedded engine with local disk persistence...');
+        }
+      }
     }
   } else {
     console.log('No DATABASE_URL provided. Initializing zero-setup embedded engine with local disk persistence...');
