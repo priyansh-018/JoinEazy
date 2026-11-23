@@ -43,6 +43,7 @@ export default function GroupsPage() {
   const [activeGroupIdForInvite, setActiveGroupIdForInvite] = useState(null);
   const [studentIdentifier, setStudentIdentifier] = useState('');
   const [isInviting, setIsInviting] = useState(false);
+  const [inviteGmailUrl, setInviteGmailUrl] = useState(null);
   const [copiedCode, setCopiedCode] = useState('');
 
   // Auto-detect ?join=CODE in URL (e.g. from invite email link)
@@ -135,6 +136,7 @@ export default function GroupsPage() {
         setActiveGroupIdForInvite(null);
         fetchMyGroups();
         setSuccessMsg(res.data.message);
+        setInviteGmailUrl(res.data.gmailUrl || null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (err) {
@@ -211,9 +213,29 @@ export default function GroupsPage() {
         </div>
       )}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 text-emerald-800 text-xs font-bold flex justify-between items-center shadow-xs">
+        <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 text-emerald-800 text-xs font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-xs">
           <span>{successMsg}</span>
-          <button onClick={() => setSuccessMsg('')} className="font-bold ml-2 underline cursor-pointer">Dismiss</button>
+          <div className="flex items-center gap-2 shrink-0">
+            {inviteGmailUrl && (
+              <a
+                href={inviteGmailUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-1.5 bg-[#1c1917] hover:bg-[#E11D48] text-white rounded-xl text-xs font-display uppercase tracking-wider transition-colors inline-flex items-center gap-1 shadow-xs"
+              >
+                <span>Send via Gmail &rarr;</span>
+              </a>
+            )}
+            <button
+              onClick={() => {
+                setSuccessMsg('');
+                setInviteGmailUrl(null);
+              }}
+              className="font-bold ml-2 underline cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 

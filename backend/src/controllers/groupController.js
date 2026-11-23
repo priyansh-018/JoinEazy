@@ -278,12 +278,13 @@ const addMember = async (req, res, next) => {
       });
 
       if (!emailResult.sent) {
-        console.error('[Invite Email Dispatch Failed]:', emailResult.error);
+        console.warn('[Invite Email Dispatch Notice]:', emailResult.error);
         return res.status(200).json({
           success: true,
           addedDirectly: false,
           warning: true,
-          message: `Group code ${group.join_code} generated, but email delivery encountered an issue (${emailResult.error || 'SMTP error'}). Please verify your Render Environment Variables.`
+          gmailUrl: emailResult.gmailUrl,
+          message: `Team code ${group.join_code} generated! (Render Free Tier blocks outbound SMTP ports). Click "Send via Gmail" to deliver the invite link directly.`
         });
       }
 

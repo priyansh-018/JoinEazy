@@ -11,14 +11,20 @@ function getTransporter() {
     const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || user.endsWith('@gmail.com');
     if (isGmail) {
       return nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        family: 4,
         auth: {
           user,
           pass
         },
-        connectionTimeout: 8000,
-        greetingTimeout: 8000,
-        socketTimeout: 10000
+        connectionTimeout: 4000,
+        greetingTimeout: 4000,
+        socketTimeout: 5000,
+        tls: {
+          rejectUnauthorized: false
+        }
       });
     }
 
@@ -26,13 +32,14 @@ function getTransporter() {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587', 10),
       secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+      family: 4,
       auth: {
         user,
         pass
       },
-      connectionTimeout: 8000,
-      greetingTimeout: 8000,
-      socketTimeout: 10000,
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 5000,
       tls: {
         rejectUnauthorized: false
       }
@@ -136,6 +143,37 @@ async function sendGroupInvitation({
 
   const textContent = `Hi,\n\n${inviterName} has invited you to join their student team "${groupName}" for ${courseDisplay} on JoinEazy.\n\nAccept invitation by clicking the link below:\n${joinUrl}\n\nGroup Join Code: ${joinCode}\n\nIf you don't have an account yet, sign up as a student and you'll be automatically enrolled.\n\nBest,\nJoinEazy Team`;
 
+  // Option 1: Send via Resend REST API (HTTPS port 443, never blocked by cloud hosts)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const { Resend } = require('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const fromAddr = process.env.RESEND_FROM || 'JoinEazy <onboarding@resend.dev>';
+      const resendRes = await resend.emails.send({
+        from: fromAddr,
+        to: [to],
+        subject,
+        html: htmlContent,
+        text: textContent
+      });
+
+      if (resendRes.error) {
+        throw new Error(resendRes.error.message || 'Resend API error');
+      }
+
+      console.log(`[Email Dispatched via Resend HTTPS]: ID ${resendRes.data?.id} delivered to ${to}`);
+      return {
+        sent: true,
+        mode: 'resend_live',
+        messageId: resendRes.data?.id,
+        message: `Invitation email dispatched directly to ${to}!`
+      };
+    } catch (err) {
+      console.warn('[Resend API Error]:', err.message);
+    }
+  }
+
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textContent)}`;
   const transporter = getTransporter();
 
   if (!transporter) {
@@ -143,16 +181,17 @@ async function sendGroupInvitation({
     console.log(`  To: ${to}`);
     console.log(`  Subject: ${subject}`);
     console.log(`  Join URL: ${joinUrl}`);
-    console.log(`  (To deliver live emails to real inboxes, configure SMTP_USER & SMTP_PASS in backend/.env)`);
     return {
-      sent: true,
+      sent: false,
       mode: 'mock',
-      message: `Invitation generated and dispatched directly to ${to}.`
+      gmailUrl,
+      message: `Invitation generated for ${to}.`
     };
   }
 
   try {
-    const fromAddress = process.env.SMTP_FROM || `"JoinEazy" <${process.env.SMTP_USER}>`;
+    const senderUser = (process.env.SMTP_USER || '').trim();
+    const fromAddress = process.env.SMTP_FROM || `"JoinEazy Platform" <${senderUser}>`;
     const info = await transporter.sendMail({
       from: fromAddress,
       to,
@@ -169,11 +208,12 @@ async function sendGroupInvitation({
       message: `Invitation email dispatched directly to ${to}!`
     };
   } catch (error) {
-    console.error(`[Email Dispatch Error]:`, error.message);
+    console.warn(`[Email Dispatch Notice - Host Block]:`, error.message);
     return {
       sent: false,
       mode: 'live_failed',
       error: error.message,
+      gmailUrl,
       message: `Failed to dispatch email directly: ${error.message}`
     };
   }
