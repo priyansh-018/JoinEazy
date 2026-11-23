@@ -19,6 +19,8 @@ services:
         generateValue: true
       - key: RESEND_API_KEY
         sync: false
+      - key: GMAIL_WEBHOOK_URL
+        sync: false
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

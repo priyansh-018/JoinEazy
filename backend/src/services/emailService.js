@@ -179,6 +179,7 @@ async function sendGroupInvitation({
       const gRes = await fetch(process.env.GMAIL_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        redirect: 'follow',
         body: JSON.stringify({
           to,
           subject,
@@ -186,14 +187,29 @@ async function sendGroupInvitation({
           text: textContent
         })
       });
-      const gData = await gRes.json();
-      if (gData.success) {
+
+      const rawText = await gRes.text();
+      let isSuccess = gRes.ok;
+      try {
+        const gData = JSON.parse(rawText);
+        if (gData && gData.success !== false) {
+          isSuccess = true;
+        }
+      } catch (_) {
+        if (gRes.ok || rawText.includes('success')) {
+          isSuccess = true;
+        }
+      }
+
+      if (isSuccess) {
         console.log(`[Email Dispatched via Gmail Webhook HTTPS]: delivered to ${to}`);
         return {
           sent: true,
           mode: 'gmail_webhook_live',
           message: `Invitation email dispatched directly to ${to}!`
         };
+      } else {
+        console.warn('[Gmail Webhook Response Warning]:', rawText.substring(0, 200));
       }
     } catch (err) {
       console.warn('[Gmail Webhook Error]:', err.message);
