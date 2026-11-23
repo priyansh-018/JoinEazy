@@ -118,9 +118,9 @@ flowchart TD
         Postgres[("PostgreSQL Database / pg-mem Pool")]
     end
 
-    Client -->|HTTP / REST API| Nginx
-    Nginx -->|Proxy /api/*| Express
-    Controllers -->|SQL Queries ($1, $2)| Postgres
+    Client -->|"HTTP / REST API"| Nginx
+    Nginx -->|"Proxy API Requests"| Express
+    Controllers -->|"Parameterized SQL Queries"| Postgres
 ```
 
 ---
