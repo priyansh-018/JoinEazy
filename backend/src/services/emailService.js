@@ -189,14 +189,17 @@ async function sendGroupInvitation({
       });
 
       const rawText = await gRes.text();
-      let isSuccess = gRes.ok;
+      let isSuccess = false;
       try {
         const gData = JSON.parse(rawText);
-        if (gData && gData.success !== false) {
+        if (gData && gData.success === true) {
           isSuccess = true;
+        } else if (gData && gData.error) {
+          console.warn('[Gmail Webhook Execution Error]:', gData.error);
+          isSuccess = false;
         }
       } catch (_) {
-        if (gRes.ok || rawText.includes('success')) {
+        if (rawText.includes('"success":true')) {
           isSuccess = true;
         }
       }
