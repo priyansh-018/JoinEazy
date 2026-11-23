@@ -53,10 +53,6 @@ export default function LandingPage() {
   const [simStep2, setSimStep2] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Interactive join code test box
-  const [testCode, setTestCode] = useState('');
-  const [codeTested, setCodeTested] = useState(false);
-
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -77,12 +73,6 @@ export default function LandingPage() {
     navigator.clipboard.writeText('https://onedrive.live.com/?id=cs401-coursework-team4');
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
-  };
-
-  const handleTestCodeSubmit = (e) => {
-    e.preventDefault();
-    if (!testCode.trim()) return;
-    setCodeTested(true);
   };
 
   // Parallax offsets
@@ -128,19 +118,19 @@ export default function LandingPage() {
           </button>
 
           <a
-            href="#demo"
-            className="w-10 h-10 rounded-full border border-stone-300 hover:border-[#1c1917] flex items-center justify-center text-stone-600 hover:text-[#1c1917] hover:bg-white transition-all cursor-pointer"
-            title="Jump to Interactive Demo"
-          >
-            <Zap className="w-4 h-4 text-[#E11D48]" />
-          </a>
-
-          <a
             href="#pillars"
-            className="w-10 h-10 rounded-full border border-transparent hover:border-[#1c1917] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full border border-stone-300 hover:border-[#1c1917] flex items-center justify-center text-stone-600 hover:text-[#1c1917] hover:bg-white transition-all cursor-pointer"
             title="System Architecture"
           >
             <Layers className="w-4 h-4" />
+          </a>
+
+          <a
+            href="#faq"
+            className="w-10 h-10 rounded-full border border-transparent hover:border-[#1c1917] flex items-center justify-center text-stone-500 hover:text-[#1c1917] transition-all cursor-pointer"
+            title="Frequently Asked Questions"
+          >
+            <HelpCircle className="w-4 h-4" />
           </a>
 
           <button
@@ -190,32 +180,18 @@ export default function LandingPage() {
                   01. PLATFORM OVERVIEW
                 </a>
                 <a
-                  href="#demo"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
-                >
-                  02. INTERACTIVE DEMO
-                </a>
-                <a
-                  href="#verification"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
-                >
-                  03. TWO-STEP VERIFY
-                </a>
-                <a
                   href="#pillars"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
                 >
-                  04. FOUR PILLARS
+                  02. ARCHITECTURE PILLARS
                 </a>
                 <a
                   href="#faq"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-[#E11D48] hover:translate-x-2 transition-all"
                 >
-                  05. FAQ
+                  03. FREQUENTLY ASKED QUESTIONS
                 </a>
               </nav>
             </div>
@@ -337,12 +313,12 @@ export default function LandingPage() {
                   <span>GET STARTED FREE</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
-                <a
-                  href="#demo"
+                <Link
+                  to="/login"
                   className="px-6 py-3.5 border-2 border-[#1c1917] hover:bg-white text-[#1c1917] font-display text-lg tracking-wider rounded-xl transition-all cursor-pointer shadow-xs"
                 >
-                  TEST INTERACTIVE DEMO
-                </a>
+                  SIGN IN TO WORKSPACE
+                </Link>
               </div>
             </div>
 
@@ -645,73 +621,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* SECTION 2: INTERACTIVE DEMO TEST LAB */}
-        <section id="demo" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5] bg-[#F5F0E8]/40">
-          <div className="max-w-5xl mx-auto space-y-10">
-            
-            <div className="text-center space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-[#E11D48]">
-                TRY IT YOURSELF
-              </span>
-              <h2 className="font-display text-4xl sm:text-5xl text-[#1c1917] tracking-tight">
-                TEST A COURSE OR GROUP JOIN CODE
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto font-medium">
-                Experience how student enrollment works by trying an invite code right now:
-              </p>
-            </div>
-
-            <div className="bg-white border-2 border-[#1c1917] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_#1c1917] space-y-6 max-w-2xl mx-auto">
-              <form onSubmit={handleTestCodeSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
-                    Enter Invite or Join Code (e.g. <button type="button" onClick={() => setTestCode('CS401-7M9K')} className="text-[#E11D48] underline cursor-pointer">CS401-7M9K</button> or <button type="button" onClick={() => setTestCode('GRP-8812')} className="text-[#E11D48] underline cursor-pointer">GRP-8812</button>)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={testCode}
-                      onChange={(e) => {
-                        setTestCode(e.target.value);
-                        setCodeTested(false);
-                      }}
-                      placeholder="e.g. CS401-7M9K"
-                      className="flex-1 px-4 py-3 rounded-xl border-2 border-[#1c1917] font-mono text-sm uppercase font-bold focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
-                    />
-                    <button
-                      type="submit"
-                      className="px-6 py-3 bg-[#1c1917] hover:bg-[#E11D48] text-white font-display text-base tracking-wider rounded-xl transition-colors cursor-pointer shadow-sm"
-                    >
-                      VERIFY CODE
-                    </button>
-                  </div>
-                </div>
-              </form>
-
-              {codeTested && (
-                <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-600 space-y-2 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span>Valid Code Recognized: {testCode.toUpperCase()}</span>
-                  </div>
-                  <p className="text-xs text-emerald-800">
-                    Course: <span className="font-bold">CS401 Cloud Computing</span> &bull; Professor: <span className="font-bold">Prof. Priyansh</span>. Ready to create or join group under this syllabus!
-                  </p>
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#E11D48] hover:underline pt-1"
-                  >
-                    <span>Sign up or login to enter this course</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </section>
-
-        {/* SECTION 3: SYSTEM ARCHITECTURE PILLARS */}
+        {/* SYSTEM ARCHITECTURE PILLARS */}
         <section id="pillars" className="p-6 sm:p-12 lg:p-16 border-b border-[#E6DFD5]">
           <div className="max-w-6xl mx-auto space-y-12">
             
