@@ -5,6 +5,17 @@ const nodemailer = require('nodemailer');
  */
 function getTransporter() {
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || process.env.SMTP_USER.endsWith('@gmail.com');
+    if (isGmail) {
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+    }
+
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587', 10),
