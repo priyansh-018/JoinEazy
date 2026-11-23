@@ -1,4 +1,5 @@
 const db = require('../db/db');
+const nodemailer = require('nodemailer');
 
 // Generate unique join code for easy team joining
 const generateJoinCode = () => {
@@ -168,7 +169,7 @@ const addMember = async (req, res, next) => {
     const { student_identifier } = req.body; // email or student_id
     const requesterId = req.user.id;
 
-    if (!student_identifier) {
+    if (!student_identifier || !student_identifier.trim()) {
       return res.status(400).json({ success: false, message: 'Student Email or Student ID is required.' });
     }
 
@@ -182,8 +183,31 @@ const addMember = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'You are not a member of this group.' });
     }
 
-    // Find student
+    // Retrieve group and associated course details
+    const groupRes = await db.query(
+      `SELECT g.id, g.name, g.join_code, c.name as course_name, c.course_code
+       FROM groups g
+       LEFT JOIN courses c ON g.course_id = c.id
+       WHERE g.id = $1`,
+      [id]
+    );
+
+    if (groupRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Group not found.' });
+    }
+
+    const group = groupRes.rows[0];
     const identifier = student_identifier.trim().toLowerCase();
+    const isEmail = identifier.includes('@');
+
+    // Build join URL & friendly invite content
+    const clientOrigin = req.headers.origin || 'http://localhost:3000';
+    const joinUrl = `${clientOrigin}/groups?join=${group.join_code}`;
+    const courseLabel = group.course_code ? `${group.course_code} (${group.course_name})` : (group.course_name || 'Academic Course');
+    const mailSubject = `[JoinEazy] ${req.user.name} invited you to join team "${group.name}"`;
+    const mailBody = `Hi there,\n\n${req.user.name} has invited you to collaborate in their student group "${group.name}" for ${courseLabel} on JoinEazy.\n\nClick the link below to accept the invitation and join the group:\n${joinUrl}\n\nGroup Join Code: ${group.join_code}\n\nIf you don't have an account yet, sign up as a student and you'll automatically be enrolled into the group!\n\nBest,\nJoinEazy Platform`;
+
+    // Search for student in existing database
     const studentRes = await db.query(
       `SELECT id, name, email, student_id, role
        FROM users
@@ -191,45 +215,127 @@ const addMember = async (req, res, next) => {
       [identifier]
     );
 
-    if (studentRes.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No registered student found with that email or Student ID. Please ensure they have created a student account first, or share your group invite code with them.'
+    // CASE 1: Student is already registered in JoinEazy
+    if (studentRes.rows.length > 0) {
+      const studentToAdd = studentRes.rows[0];
+
+      if (studentToAdd.role === 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: `${studentToAdd.name} (${studentToAdd.email}) is registered as a Professor/Instructor and cannot be added to a student group.`
+        });
+      }
+
+      // Check if already in group
+      const alreadyMember = await db.query(
+        'SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2',
+        [id, studentToAdd.id]
+      );
+
+      if (alreadyMember.rows.length > 0) {
+        return res.status(409).json({ success: false, message: `${studentToAdd.name} is already a member of this group.` });
+      }
+
+      // Add student
+      await db.query(
+        `INSERT INTO group_members (group_id, user_id, role, status)
+         VALUES ($1, $2, 'member', 'active')`,
+        [id, studentToAdd.id]
+      );
+
+      // Attempt background email dispatch via nodemailer if SMTP configured
+      let emailDispatched = false;
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '587', 10),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          });
+          await transporter.sendMail({
+            from: `"JoinEazy Groups" <${process.env.SMTP_USER}>`,
+            to: studentToAdd.email,
+            subject: mailSubject,
+            text: mailBody
+          });
+          emailDispatched = true;
+        } catch (err) {
+          console.warn('[Invite Email Dispatch Warning]:', err.message);
+        }
+      }
+
+      return res.status(201).json({
+        success: true,
+        addedDirectly: true,
+        message: `${studentToAdd.name} added to the group successfully!${emailDispatched ? ' Invitation email dispatched.' : ''}`,
+        member: studentToAdd,
+        inviteDetails: {
+          recipientEmail: studentToAdd.email,
+          groupName: group.name,
+          courseCode: group.course_code,
+          joinCode: group.join_code,
+          joinUrl,
+          mailSubject,
+          mailBody,
+          emailDispatched
+        }
       });
     }
 
-    const studentToAdd = studentRes.rows[0];
+    // CASE 2: Student is NOT registered yet, but an email was entered!
+    if (isEmail) {
+      let emailDispatched = false;
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '587', 10),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          });
+          await transporter.sendMail({
+            from: `"JoinEazy Groups" <${process.env.SMTP_USER}>`,
+            to: identifier,
+            subject: mailSubject,
+            text: mailBody
+          });
+          emailDispatched = true;
+        } catch (err) {
+          console.warn('[Invite Email Dispatch Warning]:', err.message);
+        }
+      }
 
-    // Check if user is a professor/admin
-    if (studentToAdd.role === 'admin') {
-      return res.status(400).json({
-        success: false,
-        message: `${studentToAdd.name} (${studentToAdd.email}) is registered as a Professor/Instructor and cannot be added to a student group.`
+      return res.status(200).json({
+        success: true,
+        addedDirectly: false,
+        message: `Direct group invitation generated for ${identifier}!`,
+        inviteDetails: {
+          recipientEmail: identifier,
+          groupName: group.name,
+          courseName: group.course_name,
+          courseCode: group.course_code,
+          joinCode: group.join_code,
+          joinUrl,
+          mailSubject,
+          mailBody,
+          emailDispatched
+        }
       });
     }
 
-    // Check if already in group
-    const alreadyMember = await db.query(
-      'SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2',
-      [id, studentToAdd.id]
-    );
-
-    if (alreadyMember.rows.length > 0) {
-      return res.status(409).json({ success: false, message: `${studentToAdd.name} is already a member of this group.` });
-    }
-
-    // Add student
-    await db.query(
-      `INSERT INTO group_members (group_id, user_id, role, status)
-       VALUES ($1, $2, 'member', 'active')`,
-      [id, studentToAdd.id]
-    );
-
-    res.status(201).json({
-      success: true,
-      message: `${studentToAdd.name} added to the group successfully!`,
-      member: studentToAdd
+    // CASE 3: Identifier is not an email and not found in database
+    return res.status(404).json({
+      success: false,
+      message: `No registered student found with Student ID "${student_identifier}". Enter their email address to send an invitation, or share group code ${group.join_code}.`
     });
+
   } catch (error) {
     next(error);
   }

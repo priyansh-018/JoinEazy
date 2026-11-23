@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GraduationCap, Lock, Mail, User, Hash, ArrowRight, ArrowLeft, ShieldCheck, BookOpen } from 'lucide-react';
 
@@ -15,6 +15,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,7 +36,11 @@ export default function Register() {
 
     try {
       const user = await register(formData);
-      if (user.role === 'admin') {
+      const searchParams = new URLSearchParams(location.search);
+      const redirectUrl = searchParams.get('redirect');
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/dashboard');
