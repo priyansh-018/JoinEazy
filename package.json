@@ -8,8 +8,7 @@
     "start:backend": "cd backend && npm start",
     "build:frontend": "cd frontend && npm run build",
     "docker:up": "docker-compose up --build",
-    "docker:down": "docker-compose down",
-    "record:demo": "node scripts/record-demo-video.js"
+    "docker:down": "docker-compose down"
   },
   "keywords": [
     "joineazy",
@@ -20,8 +19,5 @@
     "fullstack"
   ],
   "author": "JoinEazy Engineering Team",
-  "license": "MIT",
-  "devDependencies": {
-    "playwright": "^1.65.1"
-  }
+  "license": "MIT"
 }
