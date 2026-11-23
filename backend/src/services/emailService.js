@@ -173,6 +173,65 @@ async function sendGroupInvitation({
     }
   }
 
+  // Option 2: Send via Google Apps Script Webhook (Sends directly from your Gmail to ANY recipient over HTTPS 443, no domain needed)
+  if (process.env.GMAIL_WEBHOOK_URL) {
+    try {
+      const gRes = await fetch(process.env.GMAIL_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to,
+          subject,
+          htmlBody: htmlContent,
+          text: textContent
+        })
+      });
+      const gData = await gRes.json();
+      if (gData.success) {
+        console.log(`[Email Dispatched via Gmail Webhook HTTPS]: delivered to ${to}`);
+        return {
+          sent: true,
+          mode: 'gmail_webhook_live',
+          message: `Invitation email dispatched directly to ${to}!`
+        };
+      }
+    } catch (err) {
+      console.warn('[Gmail Webhook Error]:', err.message);
+    }
+  }
+
+  // Option 3: Send via Brevo / Sendinblue (HTTPS 443, 300 free emails/day to ANY recipient, no domain needed)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const bRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'JoinEazy Platform', email: process.env.BREVO_SENDER || 'priyansh191882@gmail.com' },
+          to: [{ email: to }],
+          subject,
+          htmlContent
+        })
+      });
+      const bData = await bRes.json();
+      if (bData.messageId) {
+        console.log(`[Email Dispatched via Brevo HTTPS]: delivered to ${to}`);
+        return {
+          sent: true,
+          mode: 'brevo_live',
+          messageId: bData.messageId,
+          message: `Invitation email dispatched directly to ${to}!`
+        };
+      }
+    } catch (err) {
+      console.warn('[Brevo API Error]:', err.message);
+    }
+  }
+
   const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(textContent)}`;
   const transporter = getTransporter();
 
