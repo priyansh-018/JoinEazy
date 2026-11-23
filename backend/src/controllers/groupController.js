@@ -203,7 +203,7 @@ const addMember = async (req, res, next) => {
 
     // Build join URL & friendly invite content
     const host = req.get('host');
-    const proto = req.headers['x-forwarded-proto'] || req.protocol;
+    const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim();
     const clientOrigin = process.env.CLIENT_URL || req.headers.origin || (host ? `${proto}://${host}` : 'http://localhost:3000');
     const joinUrl = `${clientOrigin}/groups?join=${group.join_code}`;
     const courseLabel = group.course_code ? `${group.course_code} (${group.course_name})` : (group.course_name || 'Academic Course');
