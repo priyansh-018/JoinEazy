@@ -91,23 +91,23 @@ export default function LandingPage() {
   const faqs = [
     {
       q: 'How does the Two-Step Verification submission work?',
-      a: 'Students first upload their deliverables to the shared OneDrive directory provided by the professor. In JoinEazy, the group leader toggles Step 1 ("Yes, files uploaded") and finalizes with Step 2, generating an immutable timestamp for both the team and individual peers.'
+      a: 'Students first upload their deliverables to the shared OneDrive directory designated by the instructor. In JoinEazy, the group leader toggles Step 1 ("Upload Completed") and locks Step 2 ("Final Submission Confirmation"), creating an immutable, verifiable audit timestamp for the entire group.'
     },
     {
-      q: 'How do professors keep groups separated across different subjects?',
-      a: 'Professors create subjects/courses (e.g. CS401 Cloud Computing) which generate unique Course Invite Links and codes. When students form their groups using that link, they are automatically organized under that subject and professor. When the professor assigns coursework, only groups in that course appear!'
+      q: 'Can students belong to different groups in different subjects?',
+      a: 'Yes. Groups are strictly isolated by subject and course code. A student can lead a project team in Cloud Computing while collaborating as a team member in a completely different group for another course.'
     },
     {
-      q: 'Can fellow team members confirm their individual participation?',
-      a: 'Yes! Once a group leader or member initiates the submission, other group members can log in and click "Confirm My Participation", allowing professors to track both group-level completion and individual student-level accountability.'
+      q: 'Can instructors assign coursework to specific groups instead of the entire class?',
+      a: 'Yes. When creating an assignment, instructors can choose cohort-wide distribution or selectively target specific project groups based on specialized lab tracks or group milestones.'
     },
     {
-      q: 'Is our coursework and group data permanently stored?',
-      a: 'Yes, 100%. JoinEazy features real-time cloud data synchronization with automated backups and session persistence, guaranteeing zero coursework or group data loss across devices, network interruptions, or page refreshes.'
+      q: 'How does individual participation tracking work within a group submission?',
+      a: 'Once a group submission is initiated, all group members can log in and click "Confirm My Participation". This provides instructors with a transparent student-by-student confirmation roster alongside overall group completion.'
     },
     {
-      q: 'How do I reach human support if I encounter an issue?',
-      a: 'Click "Need Help?" or "Contact Support" anywhere on the platform. Inquiries route directly to our priority support desk at priyansh191882@gmail.com with dedicated response tracking.'
+      q: 'What happens if a submission is confirmed after the deadline?',
+      a: 'Submissions made after the due date are automatically flagged with a visible "Past Due" status badge and the exact completion timestamp, allowing instructors full discretion during grading.'
     }
   ];
 
