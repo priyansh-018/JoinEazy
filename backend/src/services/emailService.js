@@ -15,7 +15,10 @@ function getTransporter() {
         auth: {
           user,
           pass
-        }
+        },
+        connectionTimeout: 8000,
+        greetingTimeout: 8000,
+        socketTimeout: 10000
       });
     }
 
@@ -27,6 +30,9 @@ function getTransporter() {
         user,
         pass
       },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
       tls: {
         rejectUnauthorized: false
       }

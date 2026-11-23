@@ -42,6 +42,7 @@ export default function GroupsPage() {
 
   const [activeGroupIdForInvite, setActiveGroupIdForInvite] = useState(null);
   const [studentIdentifier, setStudentIdentifier] = useState('');
+  const [isInviting, setIsInviting] = useState(false);
   const [copiedCode, setCopiedCode] = useState('');
 
   // Auto-detect ?join=CODE in URL (e.g. from invite email link)
@@ -124,6 +125,7 @@ export default function GroupsPage() {
   const handleAddMember = async (groupId) => {
     if (!studentIdentifier.trim()) return;
     try {
+      setIsInviting(true);
       setError('');
       const res = await api.post(`/groups/${groupId}/members`, {
         student_identifier: studentIdentifier.trim()
@@ -133,9 +135,14 @@ export default function GroupsPage() {
         setActiveGroupIdForInvite(null);
         fetchMyGroups();
         setSuccessMsg(res.data.message);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add member.');
+      const msg = err.response?.data?.message || err.message || 'Failed to send invitation.';
+      setError(msg);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsInviting(false);
     }
   };
 
@@ -284,21 +291,36 @@ export default function GroupsPage() {
                       <div className="text-[11px] font-bold text-stone-900 uppercase tracking-wider">
                         Invite peer by Student Email or Student ID:
                       </div>
-                      <div className="flex gap-2">
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleAddMember(grp.id);
+                        }}
+                        className="flex gap-2"
+                      >
                         <input
                           type="text"
                           placeholder="e.g. emma@university.edu or STU2024-002"
                           value={studentIdentifier}
                           onChange={(e) => setStudentIdentifier(e.target.value)}
-                          className="flex-1 px-3.5 py-2 text-xs rounded-xl border-2 border-[#1c1917] bg-white text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48]"
+                          disabled={isInviting}
+                          className="flex-1 px-3.5 py-2 text-xs rounded-xl border-2 border-[#1c1917] bg-white text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#E11D48] disabled:opacity-60"
                         />
                         <button
-                          onClick={() => handleAddMember(grp.id)}
-                          className="px-4 py-2 bg-[#1c1917] hover:bg-[#E11D48] text-white text-xs font-display uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs"
+                          type="submit"
+                          disabled={isInviting || !studentIdentifier.trim()}
+                          className="px-4 py-2 bg-[#1c1917] hover:bg-[#E11D48] disabled:opacity-50 text-white text-xs font-display uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs flex items-center gap-1.5 shrink-0"
                         >
-                          Invite
+                          {isInviting ? (
+                            <>
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              <span>Sending...</span>
+                            </>
+                          ) : (
+                            <span>Invite</span>
+                          )}
                         </button>
-                      </div>
+                      </form>
                     </div>
                   )}
 
