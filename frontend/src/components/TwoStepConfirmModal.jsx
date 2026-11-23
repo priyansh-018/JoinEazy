@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CheckCircle,
   ExternalLink,
@@ -18,13 +18,23 @@ export default function TwoStepConfirmModal({
   onSubmit,
   isSubmitting
 }) {
-  const [selectedGroupId, setSelectedGroupId] = useState(
-    groups && groups.length > 0 ? groups[0].id : ''
-  );
+  const [selectedGroupId, setSelectedGroupId] = useState('');
   const [step1Confirmed, setStep1Confirmed] = useState(false);
   const [step2Confirmed, setStep2Confirmed] = useState(false);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+
+  // Automatically select the appropriate group when modal opens or groups load
+  useEffect(() => {
+    if (isOpen && groups && groups.length > 0) {
+      const matchingGroup = assignment?.course_id 
+        ? groups.find((g) => String(g.course_id) === String(assignment.course_id)) 
+        : null;
+      const initialGroup = matchingGroup || groups[0];
+      setSelectedGroupId(String(initialGroup.id));
+      setError('');
+    }
+  }, [isOpen, assignment, groups]);
 
   if (!isOpen || !assignment) return null;
 
@@ -32,7 +42,9 @@ export default function TwoStepConfirmModal({
     e.preventDefault();
     setError('');
 
-    if (!selectedGroupId) {
+    const targetGroupId = selectedGroupId || (groups && groups.length > 0 ? String(groups[0].id) : '');
+
+    if (!targetGroupId) {
       setError('Please select the group submitting this assignment.');
       return;
     }
@@ -49,7 +61,7 @@ export default function TwoStepConfirmModal({
 
     onSubmit({
       assignment_id: assignment.id,
-      group_id: parseInt(selectedGroupId, 10),
+      group_id: parseInt(targetGroupId, 10),
       confirmation_step_1: true,
       confirmation_step_2: true,
       notes
@@ -118,13 +130,13 @@ export default function TwoStepConfirmModal({
             </label>
             {groups && groups.length > 0 ? (
               <select
-                value={selectedGroupId}
+                value={selectedGroupId || (groups[0] ? String(groups[0].id) : '')}
                 onChange={(e) => setSelectedGroupId(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] bg-white text-xs font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E11D48] cursor-pointer"
               >
                 {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name} ({g.member_role === 'leader' ? 'Leader' : 'Member'})
+                  <option key={g.id} value={String(g.id)}>
+                    {g.name} ({g.member_role === 'leader' || g.my_role === 'leader' ? 'Leader' : 'Member'})
                   </option>
                 ))}
               </select>
