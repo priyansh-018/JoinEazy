@@ -247,7 +247,7 @@ const addMember = async (req, res, next) => {
       );
 
       // Directly dispatch invitation email to the student
-      sendGroupInvitation({
+      const emailResult = await sendGroupInvitation({
         to: studentToAdd.email,
         inviterName: req.user.name,
         groupName: group.name,
@@ -255,19 +255,19 @@ const addMember = async (req, res, next) => {
         courseName: group.course_name,
         joinCode: group.join_code,
         joinUrl
-      }).catch(err => console.warn('[Invite Email Dispatch Warning]:', err.message));
+      });
 
       return res.status(201).json({
         success: true,
         addedDirectly: true,
-        message: `${studentToAdd.name} added to the group successfully! An invitation email has been sent to their inbox.`
+        message: `${studentToAdd.name} added to the group successfully!${emailResult.sent && emailResult.mode === 'live' ? ' An invitation email has been sent to their inbox.' : ''}`
       });
     }
 
     // CASE 2: Student is NOT registered yet, but an email was entered!
     if (isEmail) {
       // Directly dispatch invitation email with join link & instructions
-      sendGroupInvitation({
+      const emailResult = await sendGroupInvitation({
         to: identifier,
         inviterName: req.user.name,
         groupName: group.name,
@@ -275,7 +275,26 @@ const addMember = async (req, res, next) => {
         courseName: group.course_name,
         joinCode: group.join_code,
         joinUrl
-      }).catch(err => console.warn('[Invite Email Dispatch Warning]:', err.message));
+      });
+
+      if (!emailResult.sent) {
+        console.error('[Invite Email Dispatch Failed]:', emailResult.error);
+        return res.status(200).json({
+          success: true,
+          addedDirectly: false,
+          warning: true,
+          message: `Group code ${group.join_code} generated, but email delivery encountered an issue (${emailResult.error || 'SMTP error'}). Please verify your Render Environment Variables.`
+        });
+      }
+
+      if (emailResult.mode === 'mock') {
+        return res.status(200).json({
+          success: true,
+          addedDirectly: false,
+          warning: true,
+          message: `Group code ${group.join_code} generated. (Note: Live email delivery requires SMTP_USER and SMTP_PASS to be set in Render Environment Variables).`
+        });
+      }
 
       return res.status(200).json({
         success: true,

@@ -4,14 +4,17 @@ const nodemailer = require('nodemailer');
  * Configure Nodemailer transporter based on environment variables
  */
 function getTransporter() {
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-    const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || process.env.SMTP_USER.endsWith('@gmail.com');
+  const user = (process.env.SMTP_USER || '').trim();
+  const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
+
+  if (user && pass) {
+    const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || user.endsWith('@gmail.com');
     if (isGmail) {
       return nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
+          user,
+          pass
         }
       });
     }
@@ -21,8 +24,8 @@ function getTransporter() {
       port: parseInt(process.env.SMTP_PORT || '587', 10),
       secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+        user,
+        pass
       },
       tls: {
         rejectUnauthorized: false
