@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import TwoStepConfirmModal from '../components/TwoStepConfirmModal';
@@ -15,11 +16,16 @@ import {
   Search,
   Users,
   Sparkles,
-  BookOpen
+  BookOpen,
+  FileCheck2,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function AssignmentsPage() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCourseId = searchParams.get('courseId');
+
   const [assignments, setAssignments] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,10 +95,15 @@ export default function AssignmentsPage() {
     }
   };
 
-  // Filter logic
+  // Filter logic (supports Course filter from Student Dashboard click)
   const filteredAssignments = assignments.filter((a) => {
+    if (selectedCourseId && String(a.course_id) !== String(selectedCourseId)) {
+      return false;
+    }
     const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          a.description.toLowerCase().includes(searchQuery.toLowerCase());
+                          a.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (a.course_name && a.course_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                          (a.course_code && a.course_code.toLowerCase().includes(searchQuery.toLowerCase()));
     if (!matchesSearch) return false;
 
     if (filter === 'submitted') return a.submission_status === 'submitted' || a.submission_status === 'verified';
@@ -100,6 +111,11 @@ export default function AssignmentsPage() {
     if (filter === 'overdue') return a.is_overdue;
     return true;
   });
+
+  const selectedCourse = assignments.find(a => String(a.course_id) === String(selectedCourseId));
+  const selectedCourseLabel = selectedCourse
+    ? `${selectedCourse.course_code || ''} ${selectedCourse.course_name || ''}`.trim()
+    : `Course #${selectedCourseId}`;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
@@ -151,6 +167,27 @@ export default function AssignmentsPage() {
         />
       </div>
 
+      {/* Course Filter Pill / Active Indicator (Task 2 Requirement) */}
+      {selectedCourseId && (
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 border-2 border-[#E11D48] text-xs font-bold text-[#1c1917] shadow-xs">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-[#E11D48]" />
+            <span>
+              Filtered by Course: <span className="text-[#E11D48] underline">{selectedCourseLabel}</span>
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              searchParams.delete('courseId');
+              setSearchParams(searchParams);
+            }}
+            className="px-3 py-1.5 rounded-xl bg-[#1c1917] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-[#E11D48] transition-colors cursor-pointer"
+          >
+            Clear Filter ✕
+          </button>
+        </div>
+      )}
+
       {/* Notifications */}
       {error && (
         <div className="p-4 rounded-2xl bg-rose-50 border-2 border-[#E11D48] text-[#E11D48] text-xs font-bold flex justify-between items-center shadow-xs">
@@ -180,6 +217,11 @@ export default function AssignmentsPage() {
               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
+                    {assign.course_code && (
+                      <span className="px-2.5 py-0.5 rounded-lg bg-[#FAF7F2] border-2 border-[#1c1917] text-[#1c1917] font-mono text-[11px] font-bold">
+                        {assign.course_code}
+                      </span>
+                    )}
                     <h3 className="font-display text-2xl text-[#1c1917] tracking-tight">
                       {assign.title}
                     </h3>
@@ -189,6 +231,15 @@ export default function AssignmentsPage() {
                       <Badge variant="overdue" label="Past Due" />
                     ) : (
                       <Badge variant="pending" label="Pending Submission" />
+                    )}
+                    {assign.submission_type === 'individual' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-900 border-2 border-blue-800">
+                        <UserCheck className="w-3 h-3" /> Individual Submission
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-900 border-2 border-amber-800">
+                        <Users className="w-3 h-3" /> Group Submission
+                      </span>
                     )}
                     {assign.target_type === 'specific_groups' && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-900 border-2 border-purple-800">

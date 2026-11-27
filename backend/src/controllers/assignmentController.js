@@ -3,7 +3,7 @@ const db = require('../db/db');
 // Create an assignment (Admin / Professor)
 const createAssignment = async (req, res, next) => {
   try {
-    const { title, description, due_date, onedrive_link, target_type = 'all', course_id, group_ids = [] } = req.body;
+    const { title, description, due_date, onedrive_link, target_type = 'all', course_id, group_ids = [], submission_type = 'group' } = req.body;
     const adminId = req.user.id;
 
     if (!title || !description || !due_date || !onedrive_link) {
@@ -21,13 +21,14 @@ const createAssignment = async (req, res, next) => {
     }
 
     const resolvedCourseId = course_id ? parseInt(course_id, 10) : null;
+    const resolvedSubmissionType = submission_type === 'individual' ? 'individual' : 'group';
 
     // Insert assignment
     const assignRes = await db.query(
-      `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target_type, course_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target_type, course_id, submission_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [title.trim(), description.trim(), new Date(due_date).toISOString(), onedrive_link.trim(), adminId, target_type, resolvedCourseId]
+      [title.trim(), description.trim(), new Date(due_date).toISOString(), onedrive_link.trim(), adminId, target_type, resolvedCourseId, resolvedSubmissionType]
     );
 
     const assignment = assignRes.rows[0];
@@ -57,7 +58,7 @@ const createAssignment = async (req, res, next) => {
 const updateAssignment = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, description, due_date, onedrive_link, target_type, course_id, group_ids } = req.body;
+    const { title, description, due_date, onedrive_link, target_type, course_id, group_ids, submission_type } = req.body;
 
     const assignCheck = await db.query('SELECT * FROM assignments WHERE id = $1', [id]);
     if (assignCheck.rows.length === 0) {
@@ -72,13 +73,14 @@ const updateAssignment = async (req, res, next) => {
     const updatedLink = onedrive_link !== undefined ? onedrive_link.trim() : current.onedrive_link;
     const updatedTarget = target_type !== undefined ? target_type : current.target_type;
     const updatedCourseId = course_id !== undefined ? (course_id ? parseInt(course_id, 10) : null) : current.course_id;
+    const updatedSubmissionType = submission_type !== undefined ? submission_type : (current.submission_type || 'group');
 
     const updateRes = await db.query(
       `UPDATE assignments
-       SET title = $1, description = $2, due_date = $3, onedrive_link = $4, target_type = $5, course_id = $6, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $7
+       SET title = $1, description = $2, due_date = $3, onedrive_link = $4, target_type = $5, course_id = $6, submission_type = $7, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $8
        RETURNING *`,
-      [updatedTitle, updatedDesc, updatedDueDate, updatedLink, updatedTarget, updatedCourseId, id]
+      [updatedTitle, updatedDesc, updatedDueDate, updatedLink, updatedTarget, updatedCourseId, updatedSubmissionType, id]
     );
 
     // Update group mappings if target_type is specific_groups

@@ -39,6 +39,7 @@ export default function AdminAssignmentsPage() {
     due_date: '',
     onedrive_link: '',
     target_type: 'all',
+    submission_type: 'group',
     course_id: '',
     group_ids: []
   });
@@ -81,6 +82,7 @@ export default function AdminAssignmentsPage() {
       due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
       onedrive_link: 'https://onedrive.live.com/?id=joineazy-coursework',
       target_type: 'all',
+      submission_type: 'group',
       course_id: courses.length > 0 ? courses[0].id : '',
       group_ids: []
     });
@@ -96,6 +98,7 @@ export default function AdminAssignmentsPage() {
       due_date: new Date(assign.due_date).toISOString().slice(0, 16),
       onedrive_link: assign.onedrive_link,
       target_type: assign.target_type,
+      submission_type: assign.submission_type || 'group',
       course_id: assign.course_id || (courses.length > 0 ? courses[0].id : ''),
       group_ids: assign.assigned_groups ? assign.assigned_groups.map(g => g.id) : []
     });
@@ -242,6 +245,15 @@ export default function AdminAssignmentsPage() {
                     <h3 className="font-display text-2xl text-[#1c1917] tracking-tight">
                       {assign.title}
                     </h3>
+                    {assign.submission_type === 'individual' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-900 border border-blue-300">
+                        Individual
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                        Group (Leader Acknowledgment)
+                      </span>
+                    )}
                     {assign.target_type === 'all' ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-stone-800 border border-stone-300">
                         <Users className="w-3 h-3" /> All Groups in Subject
@@ -416,7 +428,7 @@ export default function AdminAssignmentsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
                     Due Date &amp; Time
@@ -439,8 +451,22 @@ export default function AdminAssignmentsPage() {
                     onChange={(e) => setFormData({ ...formData, target_type: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#E11D48] bg-white cursor-pointer"
                   >
-                    <option value="all">All Groups in this Subject</option>
-                    <option value="specific_groups">Specific Groups in this Subject</option>
+                    <option value="all">All Groups in Subject</option>
+                    <option value="specific_groups">Specific Groups</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-1">
+                    Submission Format
+                  </label>
+                  <select
+                    value={formData.submission_type || 'group'}
+                    onChange={(e) => setFormData({ ...formData, submission_type: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1c1917] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#E11D48] bg-white cursor-pointer"
+                  >
+                    <option value="group">Group Submission (Leader)</option>
+                    <option value="individual">Individual Submission</option>
                   </select>
                 </div>
               </div>

@@ -38,6 +38,11 @@ export default function TwoStepConfirmModal({
 
   if (!isOpen || !assignment) return null;
 
+  const selectedGroup = groups?.find((g) => String(g.id) === String(selectedGroupId || (groups[0]?.id)));
+  const isLeaderOfSelectedGroup = selectedGroup?.member_role === 'leader' || selectedGroup?.my_role === 'leader';
+  const isGroupAssignment = assignment?.submission_type !== 'individual';
+  const cannotSubmitBecauseNotLeader = isGroupAssignment && !isLeaderOfSelectedGroup;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
@@ -46,6 +51,11 @@ export default function TwoStepConfirmModal({
 
     if (!targetGroupId) {
       setError('Please select the group submitting this assignment.');
+      return;
+    }
+
+    if (cannotSubmitBecauseNotLeader) {
+      setError('Only the Group Leader has permission to submit group assignments on behalf of the team.');
       return;
     }
 
@@ -205,6 +215,18 @@ export default function TwoStepConfirmModal({
             />
           </div>
 
+          {cannotSubmitBecauseNotLeader && (
+            <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-600 text-amber-900 text-xs font-bold space-y-1">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <span>Group Leader Acknowledgment Required</span>
+              </div>
+              <p className="text-[11px] font-normal leading-relaxed text-amber-800">
+                Under Task-2 submission rules, only the designated <strong>Group Leader</strong> has authority to execute and acknowledge coursework submissions for the team.
+              </p>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-2 border-t-2 border-stone-200">
             <button
@@ -216,11 +238,11 @@ export default function TwoStepConfirmModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !step1Confirmed || !step2Confirmed}
+              disabled={isSubmitting || !step1Confirmed || !step2Confirmed || cannotSubmitBecauseNotLeader}
               className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#1c1917] hover:bg-[#E11D48] disabled:opacity-50 disabled:cursor-not-allowed text-white font-display text-sm uppercase tracking-wider rounded-xl shadow-[3px_3px_0px_0px_#E11D48] transition-all cursor-pointer"
             >
               <CheckCircle className="w-4 h-4" />
-              {isSubmitting ? 'CONFIRMING...' : 'COMPLETE TWO-STEP SUBMISSION'}
+              {cannotSubmitBecauseNotLeader ? 'LEADER MUST SUBMIT' : isSubmitting ? 'CONFIRMING...' : 'COMPLETE TWO-STEP SUBMISSION'}
             </button>
           </div>
         </form>

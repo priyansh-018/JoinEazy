@@ -42,6 +42,23 @@ const submitTwoStep = async (req, res, next) => {
     }
     const assignment = assignRes.rows[0];
 
+    // Task 2 Requirement: For group assignments, only the group leader can acknowledge submission
+    const userRole = membership.rows[0].role;
+    const isIndividual = assignment.submission_type === 'individual';
+    if (!isIndividual && userRole !== 'leader') {
+      const leaderRes = await db.query(
+        `SELECT u.name, u.email FROM group_members gm
+         JOIN users u ON gm.user_id = u.id
+         WHERE gm.group_id = $1 AND gm.role = 'leader'`,
+        [group_id]
+      );
+      const leaderName = leaderRes.rows[0]?.name || 'your Group Leader';
+      return res.status(403).json({
+        success: false,
+        message: `Only ${leaderName} (Group Leader) has authority to acknowledge and submit group coursework on behalf of the team.`
+      });
+    }
+
     // Check if group already submitted
     const existingSub = await db.query(
       'SELECT id FROM submissions WHERE assignment_id = $1 AND group_id = $2',

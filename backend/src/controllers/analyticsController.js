@@ -121,6 +121,45 @@ const getAdminAnalytics = async (req, res, next) => {
        LIMIT 8`
     );
 
+    // 6. Courses being taught along with student count & submission status analytics (Task 2 requirement)
+    const coursesRes = await db.query(
+      `SELECT c.id, c.name, c.course_code, c.join_code,
+              COUNT(DISTINCT g.id) as group_count,
+              COUNT(DISTINCT gm.user_id) as student_count,
+              COUNT(DISTINCT a.id) as assignment_count
+       FROM courses c
+       LEFT JOIN groups g ON c.id = g.course_id
+       LEFT JOIN group_members gm ON g.id = gm.group_id
+       LEFT JOIN assignments a ON c.id = a.course_id
+       WHERE c.professor_id = $1 OR $2 = 'admin'
+       GROUP BY c.id, c.name, c.course_code, c.join_code
+       ORDER BY c.created_at DESC`,
+      [req.user.id, req.user.role]
+    );
+
+    const coursesAnalytics = await Promise.all(
+      coursesRes.rows.map(async (c) => {
+        const subRes = await db.query(
+          `SELECT COUNT(s.id) as count
+           FROM submissions s
+           JOIN assignments a ON s.assignment_id = a.id
+           WHERE a.course_id = $1`,
+          [c.id]
+        );
+        const subCount = parseInt(subRes.rows[0].count, 10);
+        return {
+          id: c.id,
+          name: c.name,
+          course_code: c.course_code,
+          join_code: c.join_code,
+          group_count: parseInt(c.group_count, 10),
+          student_count: parseInt(c.student_count, 10),
+          assignment_count: parseInt(c.assignment_count, 10),
+          submission_count: subCount
+        };
+      })
+    );
+
     res.json({
       success: true,
       analytics: {
@@ -131,6 +170,7 @@ const getAdminAnalytics = async (req, res, next) => {
         overall_completion_rate: overallCompletionRate,
         assignment_breakdown: assignmentBreakdown,
         group_performance: groupPerformance,
+        courses_analytics: coursesAnalytics,
         recent_activity: recentSubmissionsRes.rows
       }
     });
@@ -153,6 +193,24 @@ const getStudentProgress = async (req, res, next) => {
       [userId]
     );
 
+    // Fetch enrolled courses for the student (Task 2 Requirement)
+    const enrolledCoursesRes = await db.query(
+      `SELECT DISTINCT c.id, c.name, c.course_code, c.description,
+              u.name as professor_name,
+              g.id as group_id, g.name as group_name,
+              COUNT(DISTINCT a.id) as assignment_count
+       FROM groups g
+       JOIN group_members gm ON g.id = gm.group_id
+       JOIN courses c ON g.course_id = c.id
+       LEFT JOIN users u ON c.professor_id = u.id
+       LEFT JOIN assignments a ON c.id = a.course_id
+       WHERE gm.user_id = $1
+       GROUP BY c.id, c.name, c.course_code, c.description, u.name, g.id, g.name
+       ORDER BY c.name ASC`,
+      [userId]
+    );
+    const enrolledCourses = enrolledCoursesRes.rows;
+
     const myGroups = myGroupsRes.rows;
     const groupIds = myGroups.map(g => g.id);
 
@@ -167,7 +225,8 @@ const getStudentProgress = async (req, res, next) => {
           overdue: 0,
           completion_rate: 0,
           badges: [],
-          assignments: []
+          assignments: [],
+          enrolled_courses: enrolledCourses
         }
       });
     }
@@ -283,6 +342,7 @@ const getStudentProgress = async (req, res, next) => {
         overdue: overdueCount,
         completion_rate: completionRate,
         badges,
+        enrolled_courses: enrolledCourses,
         assignments: enrichedAssignments
       }
     });

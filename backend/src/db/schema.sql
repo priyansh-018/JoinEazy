@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS assignments (
   onedrive_link TEXT NOT NULL,
   created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+  submission_type VARCHAR(20) NOT NULL DEFAULT 'group' CHECK (submission_type IN ('group', 'individual')),
   target_type VARCHAR(30) NOT NULL DEFAULT 'all' CHECK (target_type IN ('all', 'specific_groups')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

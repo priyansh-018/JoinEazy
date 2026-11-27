@@ -23,6 +23,7 @@ export default function AdminSubmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'submitted', 'verified', 'pending'
 
   const fetchSubmissions = async () => {
     try {
@@ -70,6 +71,13 @@ export default function AdminSubmissionsPage() {
   const totalGroups = submissions.length;
   const submittedGroups = submissions.filter(s => s.has_submitted).length;
   const completionRate = totalGroups > 0 ? Math.round((submittedGroups / totalGroups) * 100) : 0;
+
+  const filteredSubmissions = submissions.filter((item) => {
+    if (statusFilter === 'submitted') return item.has_submitted && item.submission_details?.status !== 'verified';
+    if (statusFilter === 'verified') return item.has_submitted && item.submission_details?.status === 'verified';
+    if (statusFilter === 'pending') return !item.has_submitted;
+    return true;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
@@ -145,14 +153,38 @@ export default function AdminSubmissionsPage() {
 
       {/* Group-wise & Student-wise Breakdown List */}
       <div className="space-y-6">
-        <h2 className="font-display text-2xl text-[#1c1917] tracking-tight flex items-center gap-2">
-          <Users className="w-6 h-6 text-[#E11D48]" />
-          GROUP-WISE &amp; STUDENT-WISE CONFIRMATION ROSTER
-        </h2>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+          <h2 className="font-display text-2xl text-[#1c1917] tracking-tight flex items-center gap-2">
+            <Users className="w-6 h-6 text-[#E11D48]" />
+            GROUP-WISE &amp; STUDENT-WISE CONFIRMATION ROSTER
+          </h2>
 
-        {submissions.length > 0 ? (
+          {/* Status Filter (Task 2 Requirement) */}
+          <div className="flex items-center gap-1.5 bg-[#FAF7F2] p-1.5 rounded-2xl border-2 border-[#1c1917]">
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'submitted', label: 'Submitted' },
+              { id: 'verified', label: 'Verified' },
+              { id: 'pending', label: 'Pending' }
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setStatusFilter(f.id)}
+                className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  statusFilter === f.id
+                    ? 'bg-[#1c1917] text-white shadow-xs'
+                    : 'text-stone-700 hover:text-stone-900'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredSubmissions.length > 0 ? (
           <div className="space-y-6">
-            {submissions.map((item) => (
+            {filteredSubmissions.map((item) => (
               <div
                 key={item.group_id}
                 className="bg-white rounded-3xl border-2 border-[#1c1917] shadow-[5px_5px_0px_0px_#1c1917] overflow-hidden space-y-0"

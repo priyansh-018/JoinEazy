@@ -174,6 +174,9 @@ async function initDB() {
 
         // Run schema
         await pool.query(schemaSql);
+        try {
+          await pool.query("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS submission_type VARCHAR(20) NOT NULL DEFAULT 'group'");
+        } catch (_) {}
         console.log('Database tables verified and ready on Neon PostgreSQL.');
         return;
       } catch (err) {

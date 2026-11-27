@@ -60,6 +60,7 @@ export default function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/courses/join" element={<JoinCoursePage />} />
                 <Route path="/courses/join/:code" element={<JoinCoursePage />} />
 
                 {/* Student Routes */}

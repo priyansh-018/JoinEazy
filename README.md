@@ -4,6 +4,33 @@ A robust, role-based full-stack web application designed for **Joineazy** to emp
 
 ---
 
+## 🌟 Task 2: UI/UX & Architecture Enhancements (Round 2 Upgrades)
+
+Building upon the initial functional prototype from Task 1, **Task 2** introduces production-grade enhancements across UI/UX, database relationships, and backend authorization:
+
+1. **Enrolled Courses Grid (Student Dashboard)**:
+   - Students now see a responsive, modern grid of all enrolled academic subjects.
+   - Each course card displays instructor name, assignment count, and is directly clickable to open that course's coursework.
+
+2. **Strict Group-Leader Submission Enforcement**:
+   - For collaborative coursework, only the **Group Leader** has permission to execute the two-step verification submission on behalf of the team.
+   - Non-leaders receive clear visual prompts explaining the leadership rule.
+   - When the leader acknowledges submission, status and confirmation timestamps synchronize across **all team members in real-time**.
+
+3. **Coursework Categorization & Course Filtering**:
+   - Clear badges delineate **Group Submissions** (requiring leader acknowledgment) from **Individual Submissions**.
+   - Direct URL filter navigation (`/assignments?courseId=...`) with one-click filter resets.
+
+4. **Professor Course-wise Analytics & Status Filters**:
+   - Professor Dashboard displays each subject taught with enrolled student counts, active student groups, and aggregate submission tracking.
+   - Ability to filter submission rosters by status (*All*, *Submitted*, *Verified*, *Pending*).
+
+5. **Live Unified Cloud Deployment**:
+   - Single-service full-stack deployment serving React 18 production build with client-side fallback routing on Node.js/Express + Neon PostgreSQL.
+   - Live Production URL: **[https://joineazy-q36y.onrender.com](https://joineazy-q36y.onrender.com)**
+
+---
+
 ## 📌 Table of Contents
 1. [Overview & Features](#-overview--features)
 2. [Technology Stack](#-technology-stack)
