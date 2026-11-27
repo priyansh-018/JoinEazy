@@ -243,6 +243,19 @@ const getAllAssignments = async (req, res, next) => {
               [submissionDetails.id, user.id]
             );
             myConfirmations = confRes.rows;
+
+            // Task 2 Requirement: When group leader acknowledges submission, reflect across all group members
+            if (myConfirmations.length === 0 && submissionDetails) {
+              myConfirmations = [{
+                submission_id: submissionDetails.id,
+                user_id: user.id,
+                assignment_id: assign.id,
+                group_id: submissionDetails.group_id,
+                confirmed_step_1: true,
+                confirmed_step_2: true,
+                confirmed_at: submissionDetails.submitted_at
+              }];
+            }
           }
         }
 

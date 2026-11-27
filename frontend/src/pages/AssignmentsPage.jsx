@@ -293,10 +293,10 @@ export default function AssignmentsPage() {
                 <div className="flex items-center gap-2">
                   {assign.submission_status === 'submitted' || assign.submission_status === 'verified' ? (
                     <div className="flex items-center gap-2">
-                      {assign.my_confirmation ? (
+                      {assign.my_confirmation || assign.submission ? (
                         <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border-2 border-emerald-600 shadow-xs">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          You Confirmed Submission
+                          Submission Confirmed
                         </div>
                       ) : (
                         <button

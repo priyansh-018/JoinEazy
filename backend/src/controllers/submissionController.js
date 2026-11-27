@@ -85,14 +85,26 @@ const submitTwoStep = async (req, res, next) => {
       submissionId = newSub.rows[0].id;
     }
 
-    // Record or update individual student confirmation
-    await db.query(
-      `INSERT INTO student_confirmations (submission_id, user_id, assignment_id, group_id, confirmed_step_1, confirmed_step_2, confirmed_at)
-       VALUES ($1, $2, $3, $4, true, true, CURRENT_TIMESTAMP)
-       ON CONFLICT (submission_id, user_id)
-       DO UPDATE SET confirmed_step_1 = true, confirmed_step_2 = true, confirmed_at = CURRENT_TIMESTAMP`,
-      [submissionId, userId, assignment_id, group_id]
+    // Record or update individual student confirmation for ALL members of the group
+    // Task 2 Requirement: When a group leader acknowledges submission, reflect the acknowledgment across all group members
+    const allMembersRes = await db.query(
+      'SELECT user_id FROM group_members WHERE group_id = $1 AND status = $2',
+      [group_id, 'active']
     );
+
+    const membersToConfirm = allMembersRes.rows.length > 0
+      ? allMembersRes.rows.map(m => m.user_id)
+      : [userId];
+
+    for (const memberId of membersToConfirm) {
+      await db.query(
+        `INSERT INTO student_confirmations (submission_id, user_id, assignment_id, group_id, confirmed_step_1, confirmed_step_2, confirmed_at)
+         VALUES ($1, $2, $3, $4, true, true, CURRENT_TIMESTAMP)
+         ON CONFLICT (submission_id, user_id)
+         DO UPDATE SET confirmed_step_1 = true, confirmed_step_2 = true, confirmed_at = CURRENT_TIMESTAMP`,
+        [submissionId, memberId, assignment_id, group_id]
+      );
+    }
 
     res.json({
       success: true,
@@ -217,10 +229,17 @@ const getAssignmentSubmissions = async (req, res, next) => {
 
         const membersWithConfirmation = membersRes.rows.map(m => {
           const conf = confirmationsMap.get(m.id);
+          // Task 2 Requirement: When a group leader acknowledges submission, reflect the acknowledgment across all group members
+          const isLeaderSubmitted = Boolean(submission);
+          const hasConfirmed = Boolean((conf && conf.confirmed_step_1 && conf.confirmed_step_2) || isLeaderSubmitted);
+          const confirmedAt = conf ? conf.confirmed_at : (submission ? submission.submitted_at : null);
+
           return {
             ...m,
-            has_confirmed: Boolean(conf && conf.confirmed_step_1 && conf.confirmed_step_2),
-            confirmed_at: conf ? conf.confirmed_at : null
+            has_confirmed: hasConfirmed,
+            confirmed_step_1: Boolean(conf?.confirmed_step_1 || isLeaderSubmitted),
+            confirmed_step_2: Boolean(conf?.confirmed_step_2 || isLeaderSubmitted),
+            confirmed_at: confirmedAt
           };
         });
 
