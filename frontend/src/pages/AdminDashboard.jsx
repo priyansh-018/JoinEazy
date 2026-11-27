@@ -112,9 +112,9 @@ export default function AdminDashboard() {
           color="blue"
         />
         <StatsCard
-          title="Registered Students"
+          title="Enrolled Students"
           value={analytics?.total_students || 0}
-          subtitle="Enrolled in system"
+          subtitle="In your courses & groups"
           icon={TrendingUp}
           color="emerald"
         />

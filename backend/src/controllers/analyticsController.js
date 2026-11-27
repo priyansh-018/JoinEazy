@@ -3,15 +3,44 @@ const db = require('../db/db');
 // Admin Analytics
 const getAdminAnalytics = async (req, res, next) => {
   try {
-    // 1. Summary counts
-    const totalAssignmentsRes = await db.query('SELECT COUNT(*) as count FROM assignments');
-    const totalGroupsRes = await db.query('SELECT COUNT(*) as count FROM groups');
-    const totalStudentsRes = await db.query("SELECT COUNT(*) as count FROM users WHERE role = 'student'");
-    const totalSubmissionsRes = await db.query('SELECT COUNT(*) as count FROM submissions');
+    const profId = req.user.id;
+    const userRole = req.user.role;
+
+    // 1. Summary counts (scoped to professor's courses & enrolled students)
+    const totalAssignmentsRes = await db.query(
+      `SELECT COUNT(DISTINCT a.id) as count 
+       FROM assignments a
+       LEFT JOIN courses c ON a.course_id = c.id
+       WHERE c.professor_id = $1 OR $2 = 'admin'`,
+      [profId, userRole]
+    );
+    const totalGroupsRes = await db.query(
+      `SELECT COUNT(DISTINCT g.id) as count 
+       FROM groups g
+       LEFT JOIN courses c ON g.course_id = c.id
+       WHERE c.professor_id = $1 OR $2 = 'admin'`,
+      [profId, userRole]
+    );
+    const enrolledStudentsRes = await db.query(
+      `SELECT COUNT(DISTINCT gm.user_id) as count
+       FROM group_members gm
+       JOIN groups g ON gm.group_id = g.id
+       JOIN courses c ON g.course_id = c.id
+       WHERE c.professor_id = $1 OR $2 = 'admin'`,
+      [profId, userRole]
+    );
+    const totalSubmissionsRes = await db.query(
+      `SELECT COUNT(DISTINCT s.id) as count 
+       FROM submissions s
+       JOIN assignments a ON s.assignment_id = a.id
+       LEFT JOIN courses c ON a.course_id = c.id
+       WHERE c.professor_id = $1 OR $2 = 'admin'`,
+      [profId, userRole]
+    );
 
     const totalAssignments = parseInt(totalAssignmentsRes.rows[0].count, 10);
     const totalGroups = parseInt(totalGroupsRes.rows[0].count, 10);
-    const totalStudents = parseInt(totalStudentsRes.rows[0].count, 10);
+    const totalStudents = parseInt(enrolledStudentsRes.rows[0].count, 10);
     const totalSubmissions = parseInt(totalSubmissionsRes.rows[0].count, 10);
 
     // 2. Assignment-wise completion metrics
