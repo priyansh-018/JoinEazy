@@ -1,373 +1,353 @@
-# 🎓 JoinEazy — Student, Group & Assignment Management System
+# 🎓 JoinEazy — Collaborative Assignment Submission & Academic Management Platform
 
-A robust, role-based full-stack web application designed for **Joineazy** to empower students to form collaborative groups, manage teammates, and confirm assignment submissions via two-step verification — while allowing professors (admins) to manage coursework, distribute assignments, track progress, and view analytics.
+[![Live Platform](https://img.shields.io/badge/Live%20Platform-Render-brightgreen?style=for-the-badge&logo=render)](https://joineazy-q36y.onrender.com)
+[![React 18](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Tailwind%20CSS-blue?style=for-the-badge&logo=react)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-green?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/Database-Neon%20Serverless%20PostgreSQL-336791?style=for-the-badge&logo=postgresql)](https://neon.tech/)
 
----
+A production-ready academic collaboration platform that bridges the gap between cloud storage submission folders (Microsoft OneDrive) and university coursework management. **JoinEazy** enables students to form project teams, manage peer memberships, and execute two-step verified coursework submissions with automatic team-wide synchronization — while giving professors real-time cohort analytics, course-wise tracking, and granular submission rosters.
 
-## 🌟 Task 2: UI/UX & Architecture Enhancements (Round 2 Upgrades)
-
-Building upon the initial functional prototype from Task 1, **Task 2** introduces production-grade enhancements across UI/UX, database relationships, and backend authorization:
-
-1. **Enrolled Courses Grid (Student Dashboard)**:
-   - Students now see a responsive, modern grid of all enrolled academic subjects.
-   - Each course card displays instructor name, assignment count, and is directly clickable to open that course's coursework.
-
-2. **Strict Group-Leader Submission Enforcement**:
-   - For collaborative coursework, only the **Group Leader** has permission to execute the two-step verification submission on behalf of the team.
-   - Non-leaders receive clear visual prompts explaining the leadership rule.
-   - When the leader acknowledges submission, status and confirmation timestamps synchronize across **all team members in real-time**.
-
-3. **Coursework Categorization & Course Filtering**:
-   - Clear badges delineate **Group Submissions** (requiring leader acknowledgment) from **Individual Submissions**.
-   - Direct URL filter navigation (`/assignments?courseId=...`) with one-click filter resets.
-
-4. **Professor Course-wise Analytics & Status Filters**:
-   - Professor Dashboard displays each subject taught with enrolled student counts, active student groups, and aggregate submission tracking.
-   - Ability to filter submission rosters by status (*All*, *Submitted*, *Verified*, *Pending*).
-
-5. **Live Unified Cloud Deployment**:
-   - Single-service full-stack deployment serving React 18 production build with client-side fallback routing on Node.js/Express + Neon PostgreSQL.
-   - Live Production URL: **[https://joineazy-q36y.onrender.com](https://joineazy-q36y.onrender.com)**
+🌐 **Live Production URL:** [https://joineazy-q36y.onrender.com](https://joineazy-q36y.onrender.com)
 
 ---
 
 ## 📌 Table of Contents
-1. [Overview & Features](#-overview--features)
-2. [Technology Stack](#-technology-stack)
-3. [System Architecture](#-system-architecture)
-4. [Database Schema & ER Diagram](#-database-schema--er-diagram)
-5. [API Endpoints Documentation](#-api-endpoints-documentation)
-6. [Setup & Running Instructions](#-setup--running-instructions)
-   - [Option A: Docker Deployment (Recommended)](#option-a-docker-deployment-recommended)
-   - [Option B: Local Development (Zero-Setup Mode)](#option-b-local-development-zero-setup-mode)
-7. [Pre-configured Demo Accounts](#-pre-configured-demo-accounts)
-8. [Key Design & Architectural Decisions](#-key-design--architectural-decisions)
+1. [Platform Overview & Mission](#-platform-overview--mission)
+2. [UI/UX Design Philosophy & Architecture](#-uiux-design-philosophy--architecture)
+3. [Key Platform Features](#-key-platform-features)
+   - [Student Experience](#-student-experience)
+   - [Professor & Admin Experience](#-professor--admin-experience)
+   - [Submission Protocol & Verification](#-submission-protocol--verification)
+4. [Component & System Architecture](#-component--system-architecture)
+5. [Database Schema & Data Model](#-database-schema--data-model)
+6. [API Endpoints Reference](#-api-endpoints-reference)
+7. [Local Setup & Installation](#-local-setup--installation)
+8. [Production Deployment Details](#-production-deployment-details)
 
 ---
 
-## 🚀 Overview & Features
+## 🎯 Platform Overview & Mission
 
-### 👨‍🎓 Student Role
-* **Authentication**: Register with Name, Email, Student ID, and secure JWT session management.
-* **Group Management**:
-  * Create new study/project groups (automatically designated as Group Leader).
-  * Unique alphanumeric Join Codes (e.g., `GRP-ALPHA`) for effortless team joining.
-  * Invite and add peers directly by **Student Email** or **Student ID**.
-  * Remove members or voluntarily leave groups.
-* **Assignment Access**:
-  * View all assignments posted by professors (both general coursework and group-targeted).
-  * One-click direct access to external **OneDrive submission links**.
-* **Two-Step Verification Submission**:
-  * **Step 1**: Checkbox affirmation: *"Yes, I have submitted"* (verifying upload to external OneDrive folder).
-  * **Step 2**: Final confirmation and submission logging on behalf of the group.
-  * Peer participation confirmation: Teammates can log their individual confirmation for group work.
-* **Visual Progress Tracking**:
-  * Visual progress bars representing coursework completion percentage.
-  * Milestone badges earned based on achievements (*"Team Player"*, *"Group Leader"*, *"All Caught Up"*, *"On A Roll"*, *"First Milestone"*).
+In university coursework, collaborative assignments typically require students to upload artifacts to external institutional drives (e.g., Microsoft OneDrive). However, traditional Learning Management Systems (LMS) create significant friction:
+- **No visibility into individual student contributions** when one student uploads a team archive.
+- **Accidental or premature submissions** by team members before work is complete.
+- **Lack of clear course-level organization** when professors manage multiple subjects simultaneously.
 
-### 👨‍🏫 Admin (Professor) Role
-* **Assignment Management**:
-  * Create, edit, and delete assignments with title, instructions, due date/time, and OneDrive link.
-  * Flexible targeting: Assign coursework to **All Student Groups** or restrict to **Specific Groups**.
-* **Group & Student Submission Tracking**:
-  * Unified tracking dashboard displaying group submission status and submission timestamps.
-  * **Student-wise Confirmation Breakdown**: Drill-down view into each group member's 2-step verification status, student ID, and confirmation timestamp.
-  * Professor verification action to inspect notes and approve submissions.
-* **Analytics & Performance Insights**:
-  * Summary metrics: Total Assignments, Student Groups, Enrolled Students, Confirmed Submissions.
-  * Overall cohort completion rate with visual status meters.
-  * Group performance table: Completed vs pending counts and completion rates per group.
-  * Assignment completion breakdown with overdue indicators.
-  * Real-time activity feed of incoming submissions.
+**JoinEazy** solves these challenges through:
+1. **Subject-Based Course & Group Isolation**: Students join specific courses via unique codes and form collaborative teams within each course context.
+2. **Two-Step Verification Protocol**: Submissions require explicit file upload affirmation followed by final confirmation to prevent accidental submissions.
+3. **Leader Acknowledgment Synchronization**: For group assignments, only the designated Team Leader has authority to acknowledge submission, immediately synchronizing confirmation across all teammates' records.
+4. **Independent Tracking for Individual Tasks**: For individual coursework, each student submits and confirms their work independently.
+5. **Real-time Professor Analytics**: Live enrollment tracking, group progress monitoring, and granular student-wise verification rosters with dynamic status filtering.
 
 ---
 
-## 🛠 Technology Stack
+## 🎨 UI/UX Design Philosophy & Architecture
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | React 18, Vite, Tailwind CSS, Lucide React, Axios, React Router v6 |
-| **Backend** | Node.js, Express.js, RESTful Architecture, CORS, Dotenv |
-| **Database** | PostgreSQL, `pg` driver (with zero-setup fallback via `pg-mem`) |
-| **Authentication** | JWT (JSON Web Tokens), `bcryptjs` password hashing |
-| **Containerization** | Docker, Docker Compose, Multi-stage Docker builds, Nginx |
+JoinEazy utilizes a modern **Neo-Brutalist & Editorial Design System** built with **Tailwind CSS** and **Lucide Icons**:
+
+### Design Choices & Rationales:
+* **High Contrast & Visual Hierarchy (`#FAF7F2` warm canvas, `#1c1917` deep ink, `#E11D48` accent rose)**:
+  - Eliminates visual fatigue common in standard corporate LMS portals while emphasizing critical action items (deadlines, submit buttons, verification alerts).
+* **Responsive Card Grids (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`)**:
+  - The Student Dashboard displays enrolled academic courses in adaptive card grids. Each card is interactive and directly routes to filtered coursework.
+* **Contextual Badge System**:
+  - Immediately signals coursework parameters (`[👥 Group Submission]` vs. `[👤 Individual Submission]`), submission state (`Awaiting Submission`, `Submitted`, `Verified by Professor`), and team roles (`👑 Leader` vs. `Member`).
+* **Visual Progress Feedback**:
+  - Cohort-wide and group-level completion progress meters with dynamic color transitions (`emerald` for complete, `indigo` for intermediate, `amber` for pending).
+* **Defensive Modal UX (Leader Guarding)**:
+  - When non-leaders open the two-step verification modal on group assignments, the UI presents an informative warning banner (`LEADER MUST SUBMIT`) and safely disables the submit action, eliminating confusion.
 
 ---
 
-## 🏛 System Architecture & Subject-Based Group Linking
+## ⚡ Key Platform Features
 
-To support multi-professor environments where instructors teach multiple subjects, the platform incorporates an invite-link course structure:
+### 👨‍🎓 Student Experience
+* **Course Enrollment**: Join academic subjects via unique 8-character course codes (e.g., `CRS-401-LAB`).
+* **Enrolled Courses Grid**: Responsive dashboard displaying active courses with direct links to assignments.
+* **Team & Group Formation**:
+  - Create project groups under specific enrolled courses (creator is automatically assigned the **Group Leader** role).
+  - Alphanumeric Group Join Codes (e.g., `GRP-ALPHA`) for effortless teammate onboarding.
+  - In-app peer invites via email or student ID.
+* **Coursework Dashboard**:
+  - Filter assignments dynamically by course with one-click filter resets.
+  - Direct links to institutional OneDrive folders.
+* **Two-Step Submission Verification**:
+  - Step 1: Affirmative check: *"Yes, I confirm files have been uploaded to OneDrive."*
+  - Step 2: Final confirmation and timestamped submission logging.
+  - Visual status badges and achievement milestones.
 
-```mermaid
-flowchart TD
-    subgraph ProfessorFlow ["Professor Workflow"]
-        P1["Create Subject / Course<br>(e.g. CS401 Cloud Computing)"] --> P2["System Generates Unique Invite Link & Code<br>(e.g. joineazy.com/courses/join/CS401-KQZ5)"]
-        P2 --> P3["Professor Shares Link / Code with Students"]
-    end
+### 👨‍🏫 Professor & Admin Experience
+* **Course Management**: Create courses, generate join codes, and inspect enrolled student rosters.
+* **Assignment Authoring**:
+  - Post coursework with title, description, due date/time, and OneDrive submission folder URL.
+  - Select submission type: **`Group Submission`** vs. **`Individual Submission`**.
+  - Target assignments to **All Student Groups** or restrict to **Specific Groups**.
+* **Cohort & Subject Analytics**:
+  - Track total enrolled students, formed groups, and received submissions per course.
+  - Cohort-wide submission completion rate with progress meters.
+  - Real-time recent submission feed.
+* **Granular Submission Rosters**:
+  - Drill down into any assignment to see group-wise and student-wise breakdowns.
+  - Inspect Step 1 verification, Step 2 confirmation, and exact timestamps for every individual student.
+  - **Status Filtering**: Filter submission rosters instantly by `All`, `Submitted`, `Verified`, or `Pending`.
+  - Verification action: Mark submissions as `Verified by Professor`.
 
-    subgraph StudentFlow ["Student Workflow"]
-        S1["Students Open Invite Link or Enter Code"] --> S2["Form Collaborative Project Group Under That Subject"]
-        S2 --> S3["Subject Badge & Professor Name Tagged on Group"]
-    end
+### 🔐 Submission Protocol & Verification
 
-    subgraph AssignmentFlow ["Targeted Assignment Distribution"]
-        P3 --> A1["Professor Creates Assignment for Subject"]
-        S3 --> A2["Only Groups Enrolled in this Subject Appear in Checklist"]
-        A1 --> A2
-        A2 --> A3["Track Submissions by Subject Roster"]
-    end
 ```
-
-```mermaid
-flowchart TD
-    subgraph Client ["Client Layer (Browser)"]
-        UI["React 18 + Tailwind CSS"]
-        AuthContext["Auth Context & JWT Storage"]
-        TwoStepModal["Two-Step Verification Modal"]
-        UI --> AuthContext
-        UI --> TwoStepModal
-    end
-
-    subgraph Gateway ["Web & Proxy Server"]
-        Nginx["Nginx Reverse Proxy (:80 / :3000)"]
-    end
-
-    subgraph Backend ["Backend API Layer (:5000)"]
-        Express["Express.js Server"]
-        JWTAuth["JWT & Role Guard Middleware"]
-        Controllers["Controllers (Auth, Groups, Assignments, Submissions, Analytics)"]
-        
-        Express --> JWTAuth
-        JWTAuth --> Controllers
-    end
-
-    subgraph Database ["Data Layer"]
-        Postgres[("PostgreSQL Database / pg-mem Pool")]
-    end
-
-    Client -->|"HTTP / REST API"| Nginx
-    Nginx -->|"Proxy API Requests"| Express
-    Controllers -->|"Parameterized SQL Queries"| Postgres
++-----------------------------------------------------------------------------------+
+|                           SUBMISSION HANDLING LOGIC                               |
++-----------------------------------------------------------------------------------+
+|                                                                                   |
+|  [GROUP SUBMISSION]                                                               |
+|  - Non-leader opens modal  --> Displays "LEADER MUST SUBMIT" banner (Action disabled)|
+|  - Leader submits          --> Step 1 & Step 2 recorded in `submissions`          |
+|                                --> Batch confirms ALL active teammates in        |
+|                                    `student_confirmations`                        |
+|                                --> Teammates immediately see "Submission Confirmed"|
+|                                --> Professor roster shows 100% team confirmation  |
+|                                                                                   |
+|  [INDIVIDUAL SUBMISSION]                                                          |
+|  - Any student submits     --> Records submission for that specific student only  |
+|                                --> Teammates remain "Pending Submission"          |
+|                                --> Professor roster tracks each student separately|
++-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 🗄 Database Schema & ER Diagram
+## 🏛 Component & System Architecture
 
-```mermaid
-erDiagram
-    USERS ||--o{ GROUPS : "creates"
-    USERS ||--o{ GROUP_MEMBERS : "belongs to"
-    USERS ||--o{ ASSIGNMENTS : "authors (admin)"
-    USERS ||--o{ SUBMISSIONS : "submits"
-    USERS ||--o{ STUDENT_CONFIRMATIONS : "confirms"
+The application adopts a decoupled full-stack architecture with strict separation of concerns:
 
-    GROUPS ||--o{ GROUP_MEMBERS : "contains"
-    GROUPS ||--o{ ASSIGNMENT_GROUPS : "assigned to"
-    GROUPS ||--o{ SUBMISSIONS : "owns"
-
-    ASSIGNMENTS ||--o{ ASSIGNMENT_GROUPS : "targets"
-    ASSIGNMENTS ||--o{ SUBMISSIONS : "receives"
-
-    SUBMISSIONS ||--o{ STUDENT_CONFIRMATIONS : "has"
-
-    USERS {
-        int id PK
-        string name
-        string email UK
-        string student_id UK
-        string password_hash
-        string role "student | admin"
-        timestamp created_at
-    }
-
-    GROUPS {
-        int id PK
-        string name
-        text description
-        int created_by FK
-        string join_code UK
-        timestamp created_at
-    }
-
-    GROUP_MEMBERS {
-        int id PK
-        int group_id FK
-        int user_id FK
-        string role "leader | member"
-        string status "active | invited"
-        timestamp joined_at
-    }
-
-    ASSIGNMENTS {
-        int id PK
-        string title
-        text description
-        timestamp due_date
-        text onedrive_link
-        int created_by FK
-        string target_type "all | specific_groups"
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    ASSIGNMENT_GROUPS {
-        int id PK
-        int assignment_id FK
-        int group_id FK
-    }
-
-    SUBMISSIONS {
-        int id PK
-        int assignment_id FK
-        int group_id FK
-        int submitted_by FK
-        boolean confirmation_step_1
-        boolean confirmation_step_2
-        text notes
-        string status "submitted | verified"
-        timestamp submitted_at
-    }
-
-    STUDENT_CONFIRMATIONS {
-        int id PK
-        int submission_id FK
-        int user_id FK
-        int assignment_id FK
-        int group_id FK
-        boolean confirmed_step_1
-        boolean confirmed_step_2
-        timestamp confirmed_at
-    }
+```
++------------------------------------------------------------------------------------+
+|                                CLIENT LAYER (React 18)                             |
+|  +--------------------+   +-----------------------+   +-------------------------+  |
+|  |  Student Dashboard |   |    Assignments Page   |   |   TwoStepConfirmModal   |  |
+|  | (Enrolled Grid)    |   | (Course Filtering)    |   | (Leader Guard / Steps)  |  |
+|  +--------------------+   +-----------------------+   +-------------------------+  |
+|  +--------------------+   +-----------------------+   +-------------------------+  |
+|  |  Professor Portal  |   |    Analytics Dashboard|   |  Submissions Roster     |  |
+|  | (Course Setup)     |   | (Enrolled Analytics)  |   | (Status Filtering)      |  |
+|  +--------------------+   +-----------------------+   +-------------------------+  |
+|                                      |                                             |
+|                              AuthContext (JWT)                                     |
++--------------------------------------|---------------------------------------------+
+                                       | HTTPS / REST JSON
++--------------------------------------v---------------------------------------------+
+|                            BACKEND API LAYER (Node.js & Express)                   |
+|  +-------------------------------------------------------------------------------+ |
+|  |                              authMiddleware                                   | |
+|  |                       (JWT Verification & Role Guard)                         | |
+|  +-------------------------------------------------------------------------------+ |
+|  +------------------+  +------------------+  +------------------+  +-------------+ |
+|  | authController   |  | courseController |  | groupController  |  | ...         | |
+|  +------------------+  +------------------+  +------------------+  +-------------+ |
+|  +-------------------------+  +-------------------------+  +---------------------+ |
+|  | assignmentController    |  | submissionController    |  | analyticsController | |
+|  +-------------------------+  +-------------------------+  +---------------------+ |
++--------------------------------------|---------------------------------------------+
+                                       | Parameterized Queries (Pool)
++--------------------------------------v---------------------------------------------+
+|                     DATA LAYER (Neon Serverless PostgreSQL)                        |
+|   courses  <--  groups  <--  group_members  <--  users                             |
+|   courses  <--  assignments  <--  submissions  <--  student_confirmations         |
++------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 📡 API Endpoints Documentation
+## 🗄 Database Schema & Data Model
 
-All protected endpoints require an `Authorization: Bearer <JWT>` header.
+The PostgreSQL schema enforces strong referential integrity, foreign key cascading, and role constraints:
 
-### 1. Authentication (`/api/auth`)
-| Method | Endpoint | Access | Description |
+### 1. `users`
+| Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | Register a student or admin |
-| `POST` | `/api/auth/login` | Public | Authenticate user & receive JWT |
-| `GET` | `/api/auth/me` | Authenticated | Fetch current user profile & active groups |
-| `GET` | `/api/auth/students/search` | Authenticated | Search students by name, email, or student ID |
+| `id` | SERIAL | PRIMARY KEY | Unique user identifier |
+| `name` | VARCHAR(120) | NOT NULL | User full name |
+| `email` | VARCHAR(180) | UNIQUE, NOT NULL | Institutional or personal email |
+| `student_id`| VARCHAR(50) | UNIQUE | University registration number (students) |
+| `password_hash`| VARCHAR(255)| NOT NULL | Bcrypt hashed credentials |
+| `role` | VARCHAR(20) | CHECK ('student', 'admin') | Role for access control |
+| `created_at`| TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Registration date |
 
-### 2. Group Management (`/api/groups`)
-| Method | Endpoint | Access | Description |
+### 2. `courses`
+| Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/groups` | Student | Create a new group (creator becomes Leader) |
-| `GET` | `/api/groups/my` | Student | List user's groups with members |
-| `GET` | `/api/groups/all` | Admin | List all student groups with stats |
-| `POST` | `/api/groups/join` | Student | Join group using 8-char join code |
-| `GET` | `/api/groups/:id` | Authenticated | Get detailed group profile & coursework |
-| `POST` | `/api/groups/:id/members` | Group Member | Add student by email or Student ID |
-| `DELETE`| `/api/groups/:id/members/:userId` | Leader/Self | Remove a member or leave group |
+| `id` | SERIAL | PRIMARY KEY | Unique course identifier |
+| `name` | VARCHAR(150) | NOT NULL | Course title (e.g., Cloud Computing) |
+| `course_code`| VARCHAR(50) | NOT NULL | Course code (e.g., CS401) |
+| `join_code` | VARCHAR(30) | UNIQUE, NOT NULL | Alphanumeric invite code for students |
+| `professor_id`| INTEGER | REFERENCES users(id) ON DELETE CASCADE | Instructor owner |
 
-### 3. Assignments (`/api/assignments`)
-| Method | Endpoint | Access | Description |
+### 3. `groups`
+| Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/assignments` | Authenticated | List assignments (role-aware filtering) |
-| `GET` | `/api/assignments/:id` | Authenticated | Fetch specific assignment details |
-| `POST` | `/api/assignments` | Admin | Create assignment with OneDrive link & target |
-| `PUT` | `/api/assignments/:id` | Admin | Update assignment information |
-| `DELETE`| `/api/assignments/:id` | Admin | Delete assignment |
+| `id` | SERIAL | PRIMARY KEY | Unique group identifier |
+| `name` | VARCHAR(150) | NOT NULL | Team name |
+| `course_id` | INTEGER | REFERENCES courses(id) ON DELETE SET NULL | Linked academic course |
+| `created_by`| INTEGER | REFERENCES users(id) ON DELETE CASCADE | Creator / Leader |
+| `join_code` | VARCHAR(20) | UNIQUE | Team join code |
 
-### 4. Submissions & Confirmations (`/api/submissions`)
-| Method | Endpoint | Access | Description |
+### 4. `group_members`
+| Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/submissions/two-step-confirm` | Student | Submit assignment with two-step verification |
-| `POST` | `/api/submissions/peer-confirm` | Student | Teammate verifies participation |
-| `GET` | `/api/submissions/assignment/:id` | Authenticated | Get group-wise & student-wise confirmations |
-| `PUT` | `/api/submissions/:id/verify` | Admin | Mark submission as verified |
+| `id` | SERIAL | PRIMARY KEY | Membership record |
+| `group_id` | INTEGER | REFERENCES groups(id) ON DELETE CASCADE | Linked group |
+| `user_id` | INTEGER | REFERENCES users(id) ON DELETE CASCADE | Enrolled student |
+| `role` | VARCHAR(20) | CHECK ('leader', 'member') | Team leadership flag |
+| `status` | VARCHAR(20) | CHECK ('active', 'invited') | Membership status |
 
-### 5. Analytics (`/api/analytics`)
-| Method | Endpoint | Access | Description |
+### 5. `assignments`
+| Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/analytics/admin` | Admin | Overall completion rate, group performance, activity |
-| `GET` | `/api/analytics/student-progress` | Student | Personal/group progress bar %, badges, status |
+| `id` | SERIAL | PRIMARY KEY | Unique assignment identifier |
+| `title` | VARCHAR(200) | NOT NULL | Coursework title |
+| `description`| TEXT | NOT NULL | Instructions and guidelines |
+| `due_date` | TIMESTAMP | NOT NULL | Submission deadline |
+| `onedrive_link`| TEXT | NOT NULL | External OneDrive destination folder URL |
+| `course_id` | INTEGER | REFERENCES courses(id) ON DELETE CASCADE | Associated subject |
+| `submission_type`| VARCHAR(20)| CHECK ('group', 'individual') | Group or individual coursework |
+| `target_type`| VARCHAR(30) | CHECK ('all', 'specific_groups') | Cohort targeting scope |
+
+### 6. `submissions`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | SERIAL | PRIMARY KEY | Submission record |
+| `assignment_id`| INTEGER | REFERENCES assignments(id) ON DELETE CASCADE | Target assignment |
+| `group_id` | INTEGER | REFERENCES groups(id) ON DELETE CASCADE | Submitting team |
+| `submitted_by`| INTEGER | REFERENCES users(id) | Student who initiated submit |
+| `confirmation_step_1` | BOOLEAN | DEFAULT FALSE | OneDrive upload confirmation |
+| `confirmation_step_2` | BOOLEAN | DEFAULT FALSE | Final submission verification |
+| `status` | VARCHAR(30) | CHECK ('draft', 'submitted', 'verified') | Workflow status |
+| `submitted_at`| TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Submission timestamp |
+| *Constraint* | UNIQUE | (assignment_id, group_id, submitted_by) | Multi-student individual submission support |
+
+### 7. `student_confirmations`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | SERIAL | PRIMARY KEY | Confirmation record |
+| `submission_id`| INTEGER | REFERENCES submissions(id) ON DELETE CASCADE | Parent submission |
+| `user_id` | INTEGER | REFERENCES users(id) ON DELETE CASCADE | Individual student confirmed |
+| `assignment_id`| INTEGER | REFERENCES assignments(id) ON DELETE CASCADE | Assignment |
+| `group_id` | INTEGER | REFERENCES groups(id) ON DELETE CASCADE | Group |
+| `confirmed_step_1` | BOOLEAN | DEFAULT FALSE | Step 1 confirmed |
+| `confirmed_step_2` | BOOLEAN | DEFAULT FALSE | Step 2 confirmed |
+| `confirmed_at`| TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Exact confirmation timestamp |
 
 ---
 
-## ⚡ Setup & Running Instructions
+## 📡 API Endpoints Reference
 
-### Option A: Docker Deployment (Recommended)
-Prerequisites: **Docker** and **Docker Compose** installed.
+All authenticated endpoints require the HTTP header `Authorization: Bearer <JWT_TOKEN>`.
 
-1. Clone repository:
-   ```bash
-   git clone <repo-url>
-   cd JoinEazy
-   ```
+### Authentication (`/api/auth`)
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Public | Register new student or professor account |
+| `POST` | `/api/auth/login` | Public | Authenticate user & return JWT token |
+| `GET` | `/api/auth/me` | Authenticated | Retrieve current user profile & memberships |
+| `GET` | `/api/auth/students/search` | Authenticated | Search peers by name, email, or Student ID |
 
-2. Run with Docker Compose:
-   ```bash
-   docker-compose up --build
-   ```
+### Courses (`/api/courses`)
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/courses/all` | Authenticated | List courses (students see enrolled; profs see taught) |
+| `POST` | `/api/courses` | Professor | Create a new subject & generate join code |
+| `POST` | `/api/courses/join` | Student | Join an academic course via join code |
+| `GET` | `/api/courses/:id` | Authenticated | Get course details and enrolled teams |
 
-3. Open in your browser:
-   - **Frontend Application**: [http://localhost:3000](http://localhost:3000) or [http://localhost](http://localhost)
-   - **Backend API**: [http://localhost:5000/health](http://localhost:5000/health)
+### Groups (`/api/groups`)
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/groups` | Student | Create a team under a course (creator becomes Leader) |
+| `GET` | `/api/groups/my` | Student | List user's active groups & teammates |
+| `GET` | `/api/groups/all` | Professor | View all formed groups across courses |
+| `POST` | `/api/groups/join` | Student | Join team via alphanumeric group code |
+| `POST` | `/api/groups/:id/members`| Member | Add a peer by email or student ID |
+| `DELETE`| `/api/groups/:id/members/:userId` | Leader/Self | Remove a member or voluntarily leave group |
 
----
+### Assignments (`/api/assignments`)
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/assignments` | Authenticated | List assignments (supports `?courseId=...` filter) |
+| `POST` | `/api/assignments` | Professor | Create assignment (Group/Individual, OneDrive URL) |
+| `PUT` | `/api/assignments/:id` | Professor | Update assignment instructions, due date, or OneDrive link |
+| `DELETE`| `/api/assignments/:id` | Professor | Remove an assignment |
 
-### Option B: Local Development (Zero-Setup Mode)
-No separate PostgreSQL installation required! If PostgreSQL is not running, the application automatically initializes an embedded in-memory PostgreSQL engine (`pg-mem`) and auto-seeds sample data.
+### Submissions & Verification (`/api/submissions`)
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/submissions/two-step-confirm` | Student | Execute two-step submission (Leader-enforced for groups) |
+| `GET` | `/api/submissions/assignment/:id` | Authenticated | View group & student-wise confirmation roster |
+| `PUT` | `/api/submissions/:id/verify` | Professor | Approve and verify submission (`status = verified`) |
 
-1. **Install backend & frontend dependencies:**
-   ```bash
-   # Terminal 1: Backend
-   cd backend
-   npm install
-   npm start
-   # Server runs on http://localhost:5000
-
-   # Terminal 2: Frontend
-   cd frontend
-   npm install
-   npm run dev
-   # Frontend runs on http://localhost:3000
-   ```
-
-2. Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 🔑 User Registration & Roles
-
-The system starts with a completely clean database (no fake/dummy data). You can register real accounts directly from the **Register** page:
-
-1. **Register as Student**:
-   - Go to [http://localhost:3000/register](http://localhost:3000/register)
-   - Select **"Student"**
-   - Provide Name, Email, Student ID, and Password
-   - Form groups, invite peers, view coursework, and submit via 2-step verification
-
-2. **Register as Professor (Admin)**:
-   - Go to [http://localhost:3000/register](http://localhost:3000/register)
-   - Select **"Professor (Admin)"**
-   - Provide Name, Email, and Password
-   - Post assignments, assign coursework to all or specific groups, and track group-wise and student-wise submission confirmations
+### Analytics (`/api/analytics`)
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/analytics/admin` | Professor | Enrolled student counts, group rates, cohort metrics |
+| `GET` | `/api/analytics/student-progress` | Student | Personal progress percentages, completion stats, badges |
 
 ---
 
-## 💡 Key Design & Architectural Decisions
+## ⚡ Local Setup & Installation
 
-1. **Two-Step Verification Protocol**:
-   Students upload their project files to an external OneDrive folder. To prevent false confirmations, the system enforces:
-   - Step 1: Explicit acknowledgment checkbox confirming file upload to OneDrive.
-   - Step 2: Final confirmation button that logs the submission and timestamps student confirmation.
+### Prerequisites
+- **Node.js** (v18.x or v20.x recommended)
+- **npm** (v9.x or higher)
+- **Git**
 
-2. **Group-Level vs. Student-Level Confirmation Separation**:
-   In collaborative academic tasks, one student often uploads the group archive, but professors need visibility into which individual team members confirmed participation. The database tracks both the group-level submission (`submissions` table) and granular individual student confirmations (`student_confirmations` table).
+### 1. Clone the Repository
+```bash
+git clone https://github.com/priyansh-018/JoinEazy.git
+cd JoinEazy
+```
 
-3. **Dual-Mode Database Architecture (Production PostgreSQL + Zero-Setup Mode)**:
-   The backend is fully PostgreSQL-native using standard SQL parameterized queries (`$1`, `$2`), foreign keys, and cascading deletes. To make technical review effortless without requiring local database provisioning, the backend gracefully falls back to an in-memory PostgreSQL engine if `DATABASE_URL` is unavailable.
+### 2. Configure Environment Variables
+Create a `.env` file inside the `backend/` directory:
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your-secure-jwt-secret-key-2026
 
-4. **Role-Based Authorization Middleware**:
-   JWT tokens encode user roles (`student` vs. `admin`). Protected Express endpoints enforce role verification with HTTP 403 Forbidden responses, and React routes use a declarative `<ProtectedRoute allowedRoles={['admin']} />` wrapper.
+# Neon PostgreSQL connection URL
+DATABASE_URL=your-postgresql-connection-string
+```
+*(Note: If `DATABASE_URL` is omitted, JoinEazy automatically activates its zero-setup embedded persistent database engine).*
 
-5. **Responsive and Accessible UI**:
-   Tailwind CSS styling delivers a clean modern dashboard with color-coded progress bars, badges, responsive tables, and mobile-friendly collapsible views.
+### 3. Run Backend Server
+```bash
+cd backend
+npm install
+npm start
+# Backend server runs on http://localhost:5000
+```
+
+### 4. Run Frontend Application
+In a separate terminal window:
+```bash
+cd frontend
+npm install
+npm run dev
+# Frontend runs on http://localhost:3000
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🚀 Production Deployment Details
+
+JoinEazy is deployed as a unified full-stack web service on **Render**:
+- **Hosting Platform**: [Render Web Services](https://render.com)
+- **Database Engine**: Neon Serverless PostgreSQL with SSL connection pooling
+- **Routing Strategy**: Single-process architecture where Express serves production-compiled Vite assets (`dist/`) with SPA fallback routing for client-side React routes (`/*`).
+- **Live Endpoint**: **[https://joineazy-q36y.onrender.com](https://joineazy-q36y.onrender.com)**
+
+---
+
+## 📄 License
+This project is developed for academic coursework evaluation and is distributed under the MIT License.
