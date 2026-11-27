@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   notes TEXT,
   status VARCHAR(30) NOT NULL DEFAULT 'submitted' CHECK (status IN ('draft', 'submitted', 'verified')),
   submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(assignment_id, group_id)
+  UNIQUE(assignment_id, group_id, submitted_by)
 );
 
 -- Student-level individual submission confirmations within the group

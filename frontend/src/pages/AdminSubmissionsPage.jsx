@@ -197,7 +197,13 @@ export default function AdminSubmissionsPage() {
                       {item.has_submitted ? (
                         <Badge
                           variant={item.submission_details?.status === 'verified' ? 'verified' : 'submitted'}
-                          label={item.submission_details?.status === 'verified' ? 'Verified by Professor' : 'Confirmed Submitted'}
+                          label={
+                            item.submission_details?.status === 'verified'
+                              ? 'Verified by Professor'
+                              : assignment?.submission_type === 'individual'
+                              ? `${item.confirmed_members_count} of ${item.total_members} Submitted`
+                              : 'Confirmed Submitted'
+                          }
                         />
                       ) : (
                         <Badge variant="pending" label="Awaiting Submission" />

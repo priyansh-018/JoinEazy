@@ -177,6 +177,11 @@ async function initDB() {
         try {
           await pool.query("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS submission_type VARCHAR(20) NOT NULL DEFAULT 'group'");
         } catch (_) {}
+        try {
+          await pool.query("ALTER TABLE submissions DROP CONSTRAINT IF EXISTS submissions_assignment_id_group_id_key");
+          await pool.query("ALTER TABLE submissions DROP CONSTRAINT IF EXISTS submissions_assignment_group_user_unique");
+          await pool.query("ALTER TABLE submissions ADD CONSTRAINT submissions_assignment_group_user_unique UNIQUE (assignment_id, group_id, submitted_by)");
+        } catch (_) {}
         console.log('Database tables verified and ready on Neon PostgreSQL.');
         return;
       } catch (err) {

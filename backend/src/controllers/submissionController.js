@@ -59,11 +59,21 @@ const submitTwoStep = async (req, res, next) => {
       });
     }
 
-    // Check if group already submitted
-    const existingSub = await db.query(
-      'SELECT id FROM submissions WHERE assignment_id = $1 AND group_id = $2',
-      [assignment_id, group_id]
-    );
+    // Check if submission already exists:
+    // For individual submission: check if current student already submitted
+    // For group submission: check if group already submitted
+    let existingSub;
+    if (isIndividual) {
+      existingSub = await db.query(
+        'SELECT id FROM submissions WHERE assignment_id = $1 AND group_id = $2 AND submitted_by = $3',
+        [assignment_id, group_id, userId]
+      );
+    } else {
+      existingSub = await db.query(
+        'SELECT id FROM submissions WHERE assignment_id = $1 AND group_id = $2',
+        [assignment_id, group_id]
+      );
+    }
 
     let submissionId;
     if (existingSub.rows.length > 0) {
@@ -85,25 +95,35 @@ const submitTwoStep = async (req, res, next) => {
       submissionId = newSub.rows[0].id;
     }
 
-    // Record or update individual student confirmation for ALL members of the group
-    // Task 2 Requirement: When a group leader acknowledges submission, reflect the acknowledgment across all group members
-    const allMembersRes = await db.query(
-      'SELECT user_id FROM group_members WHERE group_id = $1 AND status = $2',
-      [group_id, 'active']
-    );
-
-    const membersToConfirm = allMembersRes.rows.length > 0
-      ? allMembersRes.rows.map(m => m.user_id)
-      : [userId];
-
-    for (const memberId of membersToConfirm) {
+    if (isIndividual) {
+      // Individual submission: ONLY record confirmation for the submitting student
       await db.query(
         `INSERT INTO student_confirmations (submission_id, user_id, assignment_id, group_id, confirmed_step_1, confirmed_step_2, confirmed_at)
          VALUES ($1, $2, $3, $4, true, true, CURRENT_TIMESTAMP)
          ON CONFLICT (submission_id, user_id)
          DO UPDATE SET confirmed_step_1 = true, confirmed_step_2 = true, confirmed_at = CURRENT_TIMESTAMP`,
-        [submissionId, memberId, assignment_id, group_id]
+        [submissionId, userId, assignment_id, group_id]
       );
+    } else {
+      // Group submission (Task 2 Requirement): Group Leader acknowledges submission, reflecting across ALL active group members
+      const allMembersRes = await db.query(
+        'SELECT user_id FROM group_members WHERE group_id = $1 AND status = $2',
+        [group_id, 'active']
+      );
+
+      const membersToConfirm = allMembersRes.rows.length > 0
+        ? allMembersRes.rows.map(m => m.user_id)
+        : [userId];
+
+      for (const memberId of membersToConfirm) {
+        await db.query(
+          `INSERT INTO student_confirmations (submission_id, user_id, assignment_id, group_id, confirmed_step_1, confirmed_step_2, confirmed_at)
+           VALUES ($1, $2, $3, $4, true, true, CURRENT_TIMESTAMP)
+           ON CONFLICT (submission_id, user_id)
+           DO UPDATE SET confirmed_step_1 = true, confirmed_step_2 = true, confirmed_at = CURRENT_TIMESTAMP`,
+          [submissionId, memberId, assignment_id, group_id]
+        );
+      }
     }
 
     res.json({
@@ -195,16 +215,18 @@ const getAssignmentSubmissions = async (req, res, next) => {
     // 2. For each group, get submission status + member list + member confirmations
     const groupSubmissions = await Promise.all(
       eligibleGroups.map(async (grp) => {
-        // Fetch submission if exists
+        // Fetch submissions for this group
         const subRes = await db.query(
           `SELECT s.*, u.name as submitted_by_name, u.email as submitted_by_email
            FROM submissions s
            JOIN users u ON s.submitted_by = u.id
-           WHERE s.assignment_id = $1 AND s.group_id = $2`,
+           WHERE s.assignment_id = $1 AND s.group_id = $2
+           ORDER BY s.submitted_at DESC`,
           [assignment_id, grp.id]
         );
 
-        const submission = subRes.rows.length > 0 ? subRes.rows[0] : null;
+        const submissionsList = subRes.rows;
+        const latestSubmission = submissionsList.length > 0 ? submissionsList[0] : null;
 
         // Fetch all group members
         const membersRes = await db.query(
@@ -227,30 +249,53 @@ const getAssignmentSubmissions = async (req, res, next) => {
         const confirmationsMap = new Map();
         confirmationsRes.rows.forEach(c => confirmationsMap.set(c.user_id, c));
 
+        const isIndividual = assignment.submission_type === 'individual';
+
         const membersWithConfirmation = membersRes.rows.map(m => {
           const conf = confirmationsMap.get(m.id);
-          // Task 2 Requirement: When a group leader acknowledges submission, reflect the acknowledgment across all group members
-          const isLeaderSubmitted = Boolean(submission);
-          const hasConfirmed = Boolean((conf && conf.confirmed_step_1 && conf.confirmed_step_2) || isLeaderSubmitted);
-          const confirmedAt = conf ? conf.confirmed_at : (submission ? submission.submitted_at : null);
+          const memberSub = submissionsList.find(s => s.submitted_by === m.id);
+
+          let hasConfirmed = false;
+          let confirmedStep1 = false;
+          let confirmedStep2 = false;
+          let confirmedAt = null;
+
+          if (isIndividual) {
+            // For INDIVIDUAL assignments: each student must submit independently.
+            // Leader submitting does NOT mark teammate!
+            hasConfirmed = Boolean((conf && conf.confirmed_step_1 && conf.confirmed_step_2) || memberSub);
+            confirmedStep1 = Boolean(conf?.confirmed_step_1 || memberSub);
+            confirmedStep2 = Boolean(conf?.confirmed_step_2 || memberSub);
+            confirmedAt = conf?.confirmed_at || (memberSub ? memberSub.submitted_at : null);
+          } else {
+            // For GROUP assignments (Task 2 Requirement): Leader submission reflects across all group members
+            const isLeaderSubmitted = Boolean(latestSubmission);
+            hasConfirmed = Boolean((conf && conf.confirmed_step_1 && conf.confirmed_step_2) || isLeaderSubmitted);
+            confirmedStep1 = Boolean(conf?.confirmed_step_1 || isLeaderSubmitted);
+            confirmedStep2 = Boolean(conf?.confirmed_step_2 || isLeaderSubmitted);
+            confirmedAt = conf?.confirmed_at || (latestSubmission ? latestSubmission.submitted_at : null);
+          }
 
           return {
             ...m,
             has_confirmed: hasConfirmed,
-            confirmed_step_1: Boolean(conf?.confirmed_step_1 || isLeaderSubmitted),
-            confirmed_step_2: Boolean(conf?.confirmed_step_2 || isLeaderSubmitted),
+            confirmed_step_1: confirmedStep1,
+            confirmed_step_2: confirmedStep2,
             confirmed_at: confirmedAt
           };
         });
 
         const totalMembers = membersRes.rows.length;
         const confirmedMembersCount = membersWithConfirmation.filter(m => m.has_confirmed).length;
+        const hasSubmitted = isIndividual
+          ? (confirmedMembersCount > 0)
+          : Boolean(latestSubmission);
 
         return {
           group_id: grp.id,
           group_name: grp.name,
-          has_submitted: Boolean(submission),
-          submission_details: submission,
+          has_submitted: hasSubmitted,
+          submission_details: latestSubmission,
           total_members: totalMembers,
           confirmed_members_count: confirmedMembersCount,
           confirmation_percentage: totalMembers > 0 ? Math.round((confirmedMembersCount / totalMembers) * 100) : 0,

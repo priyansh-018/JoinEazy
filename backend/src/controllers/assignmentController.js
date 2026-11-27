@@ -222,15 +222,32 @@ const getAllAssignments = async (req, res, next) => {
         let myConfirmations = [];
 
         if (groupIds.length > 0) {
-          const subPlaceholders = groupIds.map((_, i) => `$${i + 2}`).join(', ');
-          const subRes = await db.query(
-            `SELECT s.*, g.name as group_name, u.name as submitted_by_name
-             FROM submissions s
-             JOIN groups g ON s.group_id = g.id
-             JOIN users u ON s.submitted_by = u.id
-             WHERE s.assignment_id = $1 AND s.group_id IN (${subPlaceholders})`,
-            [assign.id, ...groupIds]
-          );
+          const isIndividual = assign.submission_type === 'individual';
+          let subRes;
+
+          if (isIndividual) {
+            // For individual assignments: check if THIS specific student submitted
+            const subPlaceholders = groupIds.map((_, i) => `$${i + 3}`).join(', ');
+            subRes = await db.query(
+              `SELECT s.*, g.name as group_name, u.name as submitted_by_name
+               FROM submissions s
+               JOIN groups g ON s.group_id = g.id
+               JOIN users u ON s.submitted_by = u.id
+               WHERE s.assignment_id = $1 AND s.submitted_by = $2 AND s.group_id IN (${subPlaceholders})`,
+              [assign.id, user.id, ...groupIds]
+            );
+          } else {
+            // For group assignments: check if group submitted
+            const subPlaceholders = groupIds.map((_, i) => `$${i + 2}`).join(', ');
+            subRes = await db.query(
+              `SELECT s.*, g.name as group_name, u.name as submitted_by_name
+               FROM submissions s
+               JOIN groups g ON s.group_id = g.id
+               JOIN users u ON s.submitted_by = u.id
+               WHERE s.assignment_id = $1 AND s.group_id IN (${subPlaceholders})`,
+              [assign.id, ...groupIds]
+            );
+          }
 
           if (subRes.rows.length > 0) {
             submissionDetails = subRes.rows[0];
@@ -244,8 +261,8 @@ const getAllAssignments = async (req, res, next) => {
             );
             myConfirmations = confRes.rows;
 
-            // Task 2 Requirement: When group leader acknowledges submission, reflect across all group members
-            if (myConfirmations.length === 0 && submissionDetails) {
+            // Task 2 Requirement: When group leader acknowledges GROUP submission, reflect across all group members
+            if (!isIndividual && myConfirmations.length === 0 && submissionDetails) {
               myConfirmations = [{
                 submission_id: submissionDetails.id,
                 user_id: user.id,

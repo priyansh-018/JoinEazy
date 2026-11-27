@@ -226,7 +226,10 @@ export default function AssignmentsPage() {
                       {assign.title}
                     </h3>
                     {assign.submission_status === 'submitted' || assign.submission_status === 'verified' ? (
-                      <Badge variant="submitted" label="Group Submitted" />
+                      <Badge
+                        variant="submitted"
+                        label={assign.submission_type === 'individual' ? "Submitted" : "Group Submitted"}
+                      />
                     ) : assign.is_overdue ? (
                       <Badge variant="overdue" label="Past Due" />
                     ) : (
@@ -296,7 +299,7 @@ export default function AssignmentsPage() {
                       {assign.my_confirmation || assign.submission ? (
                         <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border-2 border-emerald-600 shadow-xs">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Submission Confirmed
+                          {assign.submission_type === 'individual' ? "You Confirmed Submission" : "Submission Confirmed"}
                         </div>
                       ) : (
                         <button
